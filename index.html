@@ -6,7 +6,7 @@
   <title>বিলঘর — Bilghor</title>
   <meta name="description" content="Bilghor — NESCO electricity bill calculator. BERC June 2026 tariff, prepaid meter rent, Bangla and English." />
   <meta name="theme-color" content="#0D5C4D" />
-  <script type="text/javascript" nonce="b55eb2cabb5b4df09be081d748e" src="//local.adguard.org?ts=1787994246217&amp;type=content-script&amp;dmn=nescobdraj-my.sharepoint.com&amp;url=https%3A%2F%2Fnescobdraj-my.sharepoint.com%2Fpersonal%2Fnasimbinjasim_nesco_gov_bd%2F_layouts%2F15%2Fdownload.aspx%3FUniqueId%3Dd6c3375c%252D88b4%252D4e1a%252D8ef1%252De6582d35edbf&amp;app=firefox.exe&amp;css=3&amp;js=1&amp;rel=0&amp;rji=0&amp;sbe=1&amp;stealth=0"></script><script type="text/javascript" nonce="b55eb2cabb5b4df09be081d748e" src="//local.adguard.org?ts=1787994246217&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D5C4D'/%3E%3Cpath fill='%23F4F1EA' d='M18.2 5.8 10.2 16.6h5.1L12.4 26.2l10.4-12.1h-5.3L22.6 5.8z'/%3E%3C/svg%3E" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D5C4D'/%3E%3Cpath fill='%23F4F1EA' d='M18.2 5.8 10.2 16.6h5.1L12.4 26.2l10.4-12.1h-5.3L22.6 5.8z'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
@@ -15,6 +15,7 @@
       --bg: #f4f1ea; --surface: #fffcf6; --elevated: #fff; --fg: #1c1f1c;
       --muted: #5a615c; --subtle: #8a918c; --primary: #0d5c4d; --primary-fg: #f4f1ea;
       --primary-hover: #0a4a3e; --mint: #c8e6dc; --peak: #9a3b24; --offpeak: #0d5c4d;
+      --credit: #c41e3a;
       --border: color-mix(in oklab, #1c1f1c 12%, transparent);
       --shadow: 0 0 0 1px color-mix(in oklab, #1c1f1c 8%, transparent), 0 8px 24px -12px color-mix(in oklab, #1c1f1c 10%, transparent);
       --sans: "Source Sans 3", "Noto Sans Bengali", ui-sans-serif, system-ui, sans-serif;
@@ -24,6 +25,7 @@
       --bg: #0e1210; --surface: #161c19; --elevated: #1c2420; --fg: #eceae4;
       --muted: #a8b0aa; --subtle: #7a847e; --primary: #3dba9a; --primary-fg: #0e1210;
       --primary-hover: #5cc9ad; --mint: #1a3d34; --peak: #e07a62; --offpeak: #3dba9a;
+      --credit: #f07178;
       --border: color-mix(in oklab, #eceae4 12%, transparent);
       --shadow: 0 0 0 1px color-mix(in oklab, #eceae4 10%, transparent);
     }
@@ -57,7 +59,12 @@
     main { flex: 1; }
     footer { border-top: 1px solid var(--border); background: var(--surface); }
     .foot { display: flex; flex-direction: column; gap: 8px; padding: 32px 0; }
-    .muted { color: var(--muted); } .subtle { color: var(--subtle); } .fg { color: var(--fg); }
+    .credit-by { color: var(--credit); font-weight: 700; }
+    .credit-name {
+      display: inline-block; max-width: 100%;
+      background: var(--primary); color: var(--primary-fg);
+      font-weight: 600; border-radius: 8px; padding: 2px 8px;
+    }
     .card { background: var(--surface); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); }
     .card-lg { border-radius: 24px; padding: 28px; }
     .badge { display: inline-block; background: var(--mint); color: var(--primary); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
@@ -279,7 +286,7 @@
         ["Is meter rent included?", "On prepaid, choose Yes under meter rent, then single phase (৳40) or three phase (৳250). Postpaid does not add meter rent here. Fuel surcharge is not included."],
         ["Should I switch to a time-of-use meter?", "If you can shift load out of 5–11 PM, off-peak units are cheaper on commercial, industrial, and EV categories. Residential LT-A is still a monthly slab, not TOU."],
       ]},
-      footer: { copyright: "© 2026 Bilghor", developedBy: "Developed by নাসিম বিন জসিম" },
+      footer: { developedBy: "Developed by", developedName: "নাসিম বিন জসিম , নির্বাহী প্রকৌশলী , নেসকো ।" },
       kwh: "kWh",
     },
     bn: {
@@ -302,7 +309,7 @@
         ["মিটার ভাড়া কি হিসাবে আছে?", "প্রিপেইড সিলেক্ট করে মিটার ভাড়ায় হ্যাঁ দিন, তারপর এক ফেজ (৳৪০) বা থ্রি ফেজ (৳২৫০)। পোস্টপেইডে এখানে মিটার ভাড়া যোগ হয় না। ফুয়েল সারচার্জ নেই।"],
         ["টাইম-অফ-ইউজ মিটারে যাওয়া উচিত?", "বিকেল ৫টা–রাত ১১টার বাইরে লোড সরাতে পারলে বাণিজ্যিক, শিল্প ও ইভি ক্যাটাগরিতে অফ-পিক সস্তা। আবাসিক এলটি-এ এখনও মাসিক স্ল্যাব, টিওইউ নয়।"],
       ]},
-      footer: { copyright: "© ২০২৬ বিলঘর", developedBy: "Developed by নাসিম বিন জসিম" },
+      footer: { developedBy: "Developed by", developedName: "নাসিম বিন জসিম , নির্বাহী প্রকৌশলী , নেসকো ।" },
       kwh: "কিলোওয়াট-ঘণ্টা",
     },
   };
@@ -744,7 +751,9 @@
     document.getElementById("brand").textContent = c.brand;
     document.getElementById("f-brand").textContent = c.brand;
     document.getElementById("f-tag").textContent = c.tagline;
-    document.getElementById("f-copy").textContent = c.footer.copyright + "  " + c.footer.developedBy;
+    document.getElementById("f-copy").innerHTML =
+      '<span class="credit-by">' + c.footer.developedBy + '</span> ' +
+      '<span class="credit-name">' + c.footer.developedName + "</span>";
     document.getElementById("lang-bn").className = S.lang === "bn" ? "on" : "";
     document.getElementById("lang-en").className = S.lang === "en" ? "on" : "";
     document.getElementById("theme-btn").innerHTML = S.theme === "dark"
