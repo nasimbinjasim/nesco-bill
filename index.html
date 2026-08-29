@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>বিলঘর — Bilghor</title>
+  <meta name="description" content="Bilghor — NESCO electricity bill calculator. BERC June 2026 tariff, prepaid meter rent, Bangla and English." />
+  <meta name="theme-color" content="#0D5C4D" />
+  <script type="text/javascript" nonce="b55eb2cabb5b4df09be081d748e" src="//local.adguard.org?ts=1787994246217&amp;type=content-script&amp;dmn=nescobdraj-my.sharepoint.com&amp;url=https%3A%2F%2Fnescobdraj-my.sharepoint.com%2Fpersonal%2Fnasimbinjasim_nesco_gov_bd%2F_layouts%2F15%2Fdownload.aspx%3FUniqueId%3Dd6c3375c%252D88b4%252D4e1a%252D8ef1%252De6582d35edbf&amp;app=firefox.exe&amp;css=3&amp;js=1&amp;rel=0&amp;rji=0&amp;sbe=1&amp;stealth=0"></script><script type="text/javascript" nonce="b55eb2cabb5b4df09be081d748e" src="//local.adguard.org?ts=1787994246217&amp;name=AdGuard%20Extra&amp;name=AdGuard%20Popup%20Blocker&amp;type=user-script"></script><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230D5C4D'/%3E%3Cpath fill='%23F4F1EA' d='M18.2 5.8 10.2 16.6h5.1L12.4 26.2l10.4-12.1h-5.3L22.6 5.8z'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Noto+Sans+Bengali:wght@400;500;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f1ea; --surface: #fffcf6; --elevated: #fff; --fg: #1c1f1c;
+      --muted: #5a615c; --subtle: #8a918c; --primary: #0d5c4d; --primary-fg: #f4f1ea;
+      --primary-hover: #0a4a3e; --mint: #c8e6dc; --peak: #9a3b24; --offpeak: #0d5c4d;
+      --border: color-mix(in oklab, #1c1f1c 12%, transparent);
+      --shadow: 0 0 0 1px color-mix(in oklab, #1c1f1c 8%, transparent), 0 8px 24px -12px color-mix(in oklab, #1c1f1c 10%, transparent);
+      --sans: "Source Sans 3", "Noto Sans Bengali", ui-sans-serif, system-ui, sans-serif;
+      --display: "Bricolage Grotesque", "Noto Sans Bengali", ui-sans-serif, system-ui, sans-serif;
+    }
+    html.dark {
+      --bg: #0e1210; --surface: #161c19; --elevated: #1c2420; --fg: #eceae4;
+      --muted: #a8b0aa; --subtle: #7a847e; --primary: #3dba9a; --primary-fg: #0e1210;
+      --primary-hover: #5cc9ad; --mint: #1a3d34; --peak: #e07a62; --offpeak: #3dba9a;
+      --border: color-mix(in oklab, #eceae4 12%, transparent);
+      --shadow: 0 0 0 1px color-mix(in oklab, #eceae4 10%, transparent);
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-font-smoothing: antialiased; background: var(--bg); color: var(--fg); }
+    body { margin: 0; min-height: 100dvh; font-family: var(--sans); background: var(--bg); color: var(--fg); display: flex; flex-direction: column; }
+    button:not(:disabled), [role="button"] { cursor: pointer; }
+    button { font-family: inherit; }
+    h1, h2, h3 { font-family: var(--display); letter-spacing: -0.03em; text-wrap: balance; margin: 0; }
+    a { color: var(--primary); }
+    .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+    header { position: sticky; top: 0; z-index: 40; border-bottom: 1px solid var(--border); background: color-mix(in oklab, var(--bg) 90%, transparent); backdrop-filter: blur(10px); }
+    .head { display: flex; align-items: center; gap: 12px; height: 64px; }
+    .logo { display: flex; align-items: center; gap: 10px; color: var(--fg); text-decoration: none; font-family: var(--display); font-weight: 600; font-size: 1.125rem; min-width: 0; }
+    .logo > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mark { width: 32px; height: 32px; border-radius: 8px; background: var(--primary); color: var(--primary-fg); display: grid; place-items: center; }
+    nav.desk { display: none; gap: 4px; margin-left: 16px; }
+    nav.desk a { padding: 8px 12px; border-radius: 8px; text-decoration: none; color: var(--muted); font-size: 14px; font-weight: 500; }
+    nav.desk a.on, nav.desk a:hover { background: var(--mint); color: var(--primary); }
+    .tools { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .seg { display: flex; border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+    .seg button { height: 32px; min-width: 40px; border: 0; background: transparent; color: var(--muted); border-radius: 6px; font-size: 12px; font-weight: 500; }
+    .seg button.on { background: var(--primary); color: var(--primary-fg); }
+    .icon-btn { width: 40px; height: 40px; border: 0; background: transparent; color: var(--fg); border-radius: 8px; display: grid; place-items: center; }
+    .icon-btn:hover { background: var(--mint); }
+    .burger { display: grid; }
+    nav.mob { display: none; border-top: 1px solid var(--border); padding: 12px 16px 16px; }
+    nav.mob.open { display: flex; flex-direction: column; gap: 4px; }
+    nav.mob a { padding: 12px; border-radius: 8px; text-decoration: none; color: var(--fg); font-weight: 500; }
+    nav.mob a.on { background: var(--mint); color: var(--primary); }
+    main { flex: 1; }
+    footer { border-top: 1px solid var(--border); background: var(--surface); }
+    .foot { display: flex; flex-direction: column; gap: 8px; padding: 32px 0; }
+    .muted { color: var(--muted); } .subtle { color: var(--subtle); } .fg { color: var(--fg); }
+    .card { background: var(--surface); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); }
+    .card-lg { border-radius: 24px; padding: 28px; }
+    .badge { display: inline-block; background: var(--mint); color: var(--primary); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 999px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 10px; font-weight: 600; font-size: 14px; background: var(--primary); color: var(--primary-fg); }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-sec { background: var(--elevated); color: var(--fg); box-shadow: var(--shadow); }
+    label.lbl { display: block; font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+    input[type=number], input[type=text], select {
+      width: 100%; height: 44px; border: 1px solid var(--border); border-radius: 10px;
+      background: var(--elevated); color: var(--fg); padding: 0 12px; font: inherit;
+    }
+    .hint { font-size: 12px; color: var(--subtle); margin: 6px 0 0; line-height: 1.5; }
+    .choices { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { height: 44px; min-width: 112px; flex: 1; border: 0; border-radius: 10px; padding: 0 16px; font-size: 14px; font-weight: 500; background: var(--elevated); color: var(--fg); box-shadow: var(--shadow); }
+    .chip.on { background: var(--primary); color: var(--primary-fg); box-shadow: none; }
+    .grid-2 { display: grid; gap: 24px; }
+    .hero { position: relative; overflow: hidden; border-bottom: 1px solid var(--border); padding: 40px 0 56px; }
+    .paper { pointer-events: none; position: absolute; inset: 0; opacity: .55;
+      background-image: linear-gradient(to right, color-mix(in oklab, var(--fg) 5%, transparent) 1px, transparent 1px),
+        linear-gradient(to bottom, color-mix(in oklab, var(--fg) 5%, transparent) 1px, transparent 1px);
+      background-size: 32px 32px; }
+    .title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 600; max-width: 20ch; }
+    .lead { margin-top: 16px; max-width: 42rem; color: var(--muted); font-size: 1.05rem; line-height: 1.6; }
+    .jumps { display: grid; gap: 12px; grid-template-columns: 1fr; margin-top: 20px; }
+    .jump { display: flex; gap: 12px; text-align: left; background: var(--surface); border: 0; border-radius: 16px; padding: 16px; box-shadow: var(--shadow); color: inherit; }
+    .jump:hover { transform: translateY(-2px); }
+    .jump i { width: 36px; height: 36px; border-radius: 8px; background: var(--mint); color: var(--primary); display: grid; place-items: center; flex-shrink: 0; }
+    .total { font-family: var(--display); font-size: clamp(2rem, 4vw, 3rem); font-weight: 600; font-variant-numeric: tabular-nums; }
+    .rows { margin-top: 24px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .rows > div { display: flex; justify-content: space-between; gap: 16px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .rows > div:last-child { border-bottom: 0; padding: 12px 0; font-weight: 600; }
+    .mint-box { margin-top: 20px; background: var(--mint); border-radius: 16px; padding: 16px; }
+    html.dark .mint-box { background: color-mix(in oklab, var(--mint) 70%, transparent); }
+    .bar-track { display: flex; height: 12px; overflow: hidden; border-radius: 999px; background: var(--elevated); margin-top: 12px; }
+    .bar-track span { height: 100%; min-width: 0; }
+    .mini { height: 6px; border-radius: 999px; background: var(--elevated); overflow: hidden; flex: 1; }
+    .mini > i { display: block; height: 100%; border-radius: 999px; }
+    .t-primary { background: var(--primary); } .t-70 { background: color-mix(in oklab, var(--primary) 70%, transparent); }
+    .t-45 { background: color-mix(in oklab, var(--primary) 45%, transparent); } .t-peak { background: var(--peak); }
+    .t-off { background: var(--offpeak); } .t-mint { background: var(--mint); } .t-rest { background: color-mix(in oklab, var(--subtle) 60%, transparent); }
+    .legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 8px; font-size: 12px; color: var(--muted); }
+    .dot { width: 8px; height: 8px; border-radius: 99px; display: inline-block; margin-right: 6px; }
+    .slab-row { background: var(--bg); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+    .page { padding: 40px 0 64px; }
+    .filters { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { height: 44px; border: 0; border-radius: 999px; padding: 0 16px; font-size: 14px; font-weight: 500; background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
+    .pill.on { background: var(--primary); color: var(--primary-fg); box-shadow: none; }
+    .cat-grid { display: grid; gap: 16px; margin-top: 32px; }
+    details.faq { border-bottom: 1px solid var(--border); padding: 16px 0; }
+    details.faq > summary { cursor: pointer; list-style: none; font-weight: 500; display: flex; justify-content: space-between; gap: 16px; min-height: 44px; align-items: start; }
+    details.faq > summary::-webkit-details-marker { display: none; }
+    .guide h3 { font-size: 1.1rem; margin: 20px 0 8px; }
+    .guide p, .guide li { color: var(--muted); line-height: 1.65; }
+    .guide table { width: 100%; border-collapse: collapse; font-size: 14px; margin: 12px 0 20px; }
+    .guide th, .guide td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .guide th { color: var(--subtle); font-weight: 600; font-size: 12px; }
+    .callout { background: var(--mint); border-radius: 12px; padding: 14px 16px; color: var(--fg); font-size: 14px; line-height: 1.55; }
+    .formula { font-family: var(--display); background: var(--surface); box-shadow: var(--shadow); border-radius: 12px; padding: 16px; }
+    @media (min-width: 640px) {
+      .jumps { grid-template-columns: 1fr 1fr; }
+      .chip { flex: none; }
+    }
+    @media (min-width: 900px) {
+      nav.desk { display: flex; } .burger { display: none; }
+      .grid-2 { grid-template-columns: 1fr 1fr; }
+      .jumps { grid-template-columns: repeat(5, 1fr); }
+      .cat-grid { grid-template-columns: 1fr 1fr; }
+      .foot { flex-direction: row; justify-content: space-between; align-items: end; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    @media print { header, footer, .no-print { display: none !important; } }
+  </style>
+</head>
+<body>
+  <a href="#main" class="sr" style="position:absolute;left:-999px">Skip</a>
+  <header>
+    <div class="wrap head">
+      <a class="logo" href="#calc">
+        <span class="mark" aria-hidden="true">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg>
+        </span>
+        <span id="brand">বিলঘর</span>
+      </a>
+      <nav class="desk" id="nav-desk"></nav>
+      <div class="tools">
+        <div class="seg" role="group" aria-label="Language">
+          <button type="button" id="lang-bn" onclick="setLang('bn')">বাং</button>
+          <button type="button" id="lang-en" onclick="setLang('en')">EN</button>
+        </div>
+        <button type="button" class="icon-btn" id="theme-btn" onclick="toggleTheme()" aria-label="Theme"></button>
+        <button type="button" class="icon-btn burger" id="menu-btn" onclick="toggleMenu()" aria-label="Menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav class="mob" id="nav-mob"></nav>
+  </header>
+  <main id="main"></main>
+  <footer>
+    <div class="wrap foot">
+      <div>
+        <p style="font-family:var(--display);font-weight:600;font-size:1.1rem;margin:0" id="f-brand">বিলঘর</p>
+        <p class="muted" style="margin:6px 0 0;max-width:28rem;font-size:14px;line-height:1.5" id="f-tag"></p>
+      </div>
+      <p class="subtle" style="margin:0;font-size:12px" id="f-copy"></p>
+    </div>
+  </footer>
+  <script>
+(function () {
+  const VAT = 0.05, PREPAID = 0.005, RENT_1 = 40, RENT_3 = 250;
+  const RES = [
+    { from: 0, to: 75, rate: 5.26, en: "0 – 75", bn: "০ – ৭৫" },
+    { from: 75, to: 200, rate: 8.5, en: "76 – 200", bn: "৭৬ – ২০০" },
+    { from: 200, to: 300, rate: 9.1, en: "201 – 300", bn: "২০১ – ৩০০" },
+    { from: 300, to: 400, rate: 9.62, en: "301 – 400", bn: "৩০১ – ৪০০" },
+    { from: 400, to: 600, rate: 15.01, en: "401 – 600", bn: "৪০১ – ৬০০" },
+    { from: 600, to: null, rate: 17.35, en: "601+", bn: "৬০১+" },
+  ];
+  const RES24 = [
+    { from: 0, to: 75, rate: 5.26, en: "0 – 75", bn: "০ – ৭৫" },
+    { from: 75, to: 200, rate: 7.2, en: "76 – 200", bn: "৭৬ – ২০০" },
+    { from: 200, to: 300, rate: 7.59, en: "201 – 300", bn: "২০১ – ৩০০" },
+    { from: 300, to: 400, rate: 8.02, en: "301 – 400", bn: "৩০১ – ৪০০" },
+    { from: 400, to: 600, rate: 12.67, en: "401 – 600", bn: "৪০১ – ৬০০" },
+    { from: 600, to: null, rate: 14.61, en: "601+", bn: "৬০১+" },
+  ];
+  const CATS = [
+    { id: "LT-A", v: "LT", kind: "slab", demand: 42, nameEn: "Residential", nameBn: "আবাসিক", shortEn: "Home or flat", shortBn: "বাড়ি বা ফ্ল্যাট", descEn: "Most homes — light, fan, and domestic use at 230/400V.", descBn: "সাধারণ বাড়িঘর — লাইট, ফ্যান ও গৃহস্থালি ব্যবহার, ২৩০/৪০০ ভোল্ট।", slabs: RES, lifeline: { max: 50, rate: 4.63 } },
+    { id: "LT-B", v: "LT", kind: "flat", demand: 42, nameEn: "Irrigation / Agricultural pump", nameBn: "সেচ / কৃষি পাম্প", shortEn: "Irrigation pump", shortBn: "সেচ পাম্প", descEn: "Irrigation and agricultural pumping at low tension.", descBn: "সেচ ও কৃষিকাজে ব্যবহৃত পাম্প সংযোগ।", flat: 6.04 },
+    { id: "LT-C1", v: "LT", kind: "tou", demand: 48, nameEn: "Small industry", nameBn: "ক্ষুদ্র শিল্প", shortEn: "Small factory", shortBn: "ছোট কারখানা", descEn: "Small-scale industrial connections at 230/400V.", descBn: "ক্ষুদ্র শিল্প ও কারখানার সংযোগ।", tou: { peak: 15.27, offPeak: 11.45 } },
+    { id: "LT-C2", v: "LT", kind: "flat", demand: 120, nameEn: "Construction", nameBn: "নির্মাণ", shortEn: "Construction site", shortBn: "নির্মাণ কাজ", descEn: "Temporary construction power at low tension.", descBn: "নির্মাণকাজের অস্থায়ী সংযোগ।", flat: 18.09 },
+    { id: "LT-D1", v: "LT", kind: "flat", demand: 60, nameEn: "Education, religious, charitable & hospital", nameBn: "শিক্ষা, ধর্মীয়, দাতব্য ও হাসপাতাল", shortEn: "School / hospital", shortBn: "স্কুল / হাসপাতাল", descEn: "Hospitals, schools, mosques, temples, and charitable institutions.", descBn: "হাসপাতাল, শিক্ষাপ্রতিষ্ঠান, ধর্মীয় ও দাতব্য প্রতিষ্ঠান।", flat: 9.05 },
+    { id: "LT-D2", v: "LT", kind: "flat", demand: 90, nameEn: "Street light & water pump", nameBn: "স্ট্রিট লাইট ও পানি পাম্প", shortEn: "Street light", shortBn: "রাস্তার বাতি", descEn: "Public street lighting and municipal water pumps.", descBn: "রাস্তার বাতি ও পৌর পানি পাম্প।", flat: 11.46 },
+    { id: "LT-D3", v: "LT", kind: "tou", demand: 90, nameEn: "EV & battery charging", nameBn: "ইভি ও ব্যাটারি চার্জিং", shortEn: "EV charging", shortBn: "ইভি চার্জিং", descEn: "Electric vehicle and battery charging stations at LT.", descBn: "ইলেকট্রিক যান ও ব্যাটারি চার্জিং স্টেশন।", tou: { peak: 14.2, offPeak: 10.22, superOffPeak: 9.09 } },
+    { id: "LT-E", v: "LT", kind: "tou", demand: 90, nameEn: "Commercial & office", nameBn: "বাণিজ্যিক ও অফিস", shortEn: "Shop or office", shortBn: "দোকান বা অফিস", descEn: "Shops, offices, and commercial hubs at 230/400V.", descBn: "দোকান, অফিস ও বাণিজ্যিক প্রতিষ্ঠান।", tou: { peak: 18.43, offPeak: 13.82 } },
+    { id: "LT-T", v: "LT", kind: "flat", demand: 120, nameEn: "Temporary", nameBn: "অস্থায়ী", shortEn: "Temporary connection", shortBn: "অস্থায়ী সংযোগ", descEn: "Short-term temporary connections at low tension.", descBn: "স্বল্পমেয়াদি অস্থায়ী সংযোগ।", flat: 23.81 },
+    { id: "MT-1", v: "MT", kind: "tou", demand: 90, nameEn: "Residential", nameBn: "আবাসিক", shortEn: "11kV housing", shortBn: "১১ কেভি আবাসিক", descEn: "High-voltage residential complexes at 11kV.", descBn: "১১ কেভি আবাসিক কমপ্লেক্স।", tou: { peak: 15.62, offPeak: 11.25 } },
+    { id: "MT-2", v: "MT", kind: "tou", demand: 90, nameEn: "Commercial & office", nameBn: "বাণিজ্যিক ও অফিস", shortEn: "11kV commercial", shortBn: "১১ কেভি বাণিজ্যিক", descEn: "Large commercial buildings at 11kV.", descBn: "১১ কেভি বড় বাণিজ্যিক ভবন।", tou: { peak: 17.41, offPeak: 12.54 } },
+    { id: "MT-3", v: "MT", kind: "tou", demand: 90, nameEn: "Industry", nameBn: "শিল্প", shortEn: "11kV industry", shortBn: "১১ কেভি শিল্প", descEn: "Industrial connections at 11kV.", descBn: "১১ কেভি শিল্প সংযোগ।", tou: { peak: 16.06, offPeak: 11.56 } },
+    { id: "MT-4", v: "MT", kind: "tou", demand: 120, nameEn: "Construction", nameBn: "নির্মাণ", shortEn: "11kV construction", shortBn: "১১ কেভি নির্মাণ", descEn: "Construction power at 11kV.", descBn: "১১ কেভি নির্মাণ বিদ্যুৎ।", tou: { peak: 21.45, offPeak: 15.44 } },
+    { id: "MT-5", v: "MT", kind: "tou", demand: 90, nameEn: "General purpose", nameBn: "সাধারণ ব্যবহার", shortEn: "11kV general", shortBn: "১১ কেভি সাধারণ", descEn: "Institutions and public services at 11kV.", descBn: "১১ কেভি প্রতিষ্ঠান ও সরকারি সেবা।", tou: { peak: 15.72, offPeak: 11.32 } },
+    { id: "MT-6", v: "MT", kind: "flat", demand: 120, nameEn: "Temporary", nameBn: "অস্থায়ী", shortEn: "11kV temporary", shortBn: "১১ কেভি অস্থায়ী", descEn: "Short-term 11kV power.", descBn: "স্বল্পমেয়াদি ১১ কেভি সংযোগ।", flat: 22.56 },
+    { id: "MT-7", v: "MT", kind: "tou", demand: 90, nameEn: "Battery charging station", nameBn: "ব্যাটারি চার্জিং স্টেশন", shortEn: "11kV charging", shortBn: "১১ কেভি চার্জিং", descEn: "Large-scale battery charging at 11kV.", descBn: "১১ কেভি বড় আকারের ব্যাটারি চার্জিং।", tou: { peak: 14.14, offPeak: 10.18, superOffPeak: 9.05 } },
+    { id: "MT-8", v: "MT", kind: "tou", demand: 90, nameEn: "Irrigation / Agricultural pump", nameBn: "সেচ / কৃষি পাম্প", shortEn: "11kV irrigation", shortBn: "১১ কেভি সেচ", descEn: "Agricultural usage at 11kV.", descBn: "১১ কেভি কৃষি ও সেচ ব্যবহার।", tou: { peak: 9.23, offPeak: 6.64 } },
+  ];
+  const FEB = {
+    "LT-A": { slabs: RES24, lifeline: { max: 50, rate: 4.63 } },
+    "LT-B": { flat: 5.25 },
+    "LT-C1": { tou: { peak: 12.95, offPeak: 9.68 } },
+    "LT-C2": { flat: 15.15 },
+    "LT-D1": { flat: 7.55 },
+    "LT-D2": { flat: 9.71 },
+    "LT-D3": { tou: { peak: 12.14, offPeak: 8.66, superOffPeak: 7.68 } },
+    "LT-E": { tou: { peak: 15.62, offPeak: 11.71 } },
+    "LT-T": { flat: 20.17 },
+    "MT-1": { tou: { peak: 13.29, offPeak: 9.5 } },
+    "MT-2": { tou: { peak: 14.57, offPeak: 10.48 } },
+    "MT-3": { tou: { peak: 13.62, offPeak: 9.75 } },
+    "MT-4": { tou: { peak: 18.06, offPeak: 12.99 } },
+    "MT-5": { tou: { peak: 13.42, offPeak: 9.56 } },
+    "MT-6": { flat: 19.02 },
+    "MT-7": { tou: { peak: 12.14, offPeak: 8.63, superOffPeak: 7.71 } },
+    "MT-8": { tou: { peak: 8.06, offPeak: 5.77 } },
+  };
+  const FEES = [
+    { en: "New connection & load-change application (per meter)", bn: "নতুন সংযোগ ও লোড পরিবর্তনের আবেদন ফি (প্রতি মিটার)", bands: [["LT — single phase","এলটি — এক ফেজ",120],["LT — three phase","এলটি — তিন ফেজ",360],["MT","এমটি",1200]] },
+    { en: "Temporary connection application", bn: "অস্থায়ী সংযোগের আবেদন ফি", bands: [["LT — single phase","এলটি — এক ফেজ",300],["LT — three phase","এলটি — তিন ফেজ",600],["MT","এমটি",1200]] },
+    { en: "Disconnection for arrears", bn: "বকেয়ার জন্য সংযোগ বিচ্ছিন্নকরণ", bands: [["LT — single phase","এলটি — এক ফেজ",360],["LT — three phase","এলটি — তিন ফেজ",960],["MT","এমটি",6000]] },
+    { en: "Reconnection after arrears disconnection", bn: "বকেয়া বিচ্ছিন্নকরণের পর পুনঃসংযোগ", bands: [["LT — single phase","এলটি — এক ফেজ",360],["LT — three phase","এলটি — তিন ফেজ",960],["MT","এমটি",6000]] },
+    { en: "Disconnection on customer request", bn: "গ্রাহকের অনুরোধে সংযোগ বিচ্ছিন্নকরণ", bands: [["LT — single phase","এলটি — এক ফেজ",240],["LT — three phase","এলটি — তিন ফেজ",480],["MT","এমটি",1200]] },
+    { en: "Reconnection after customer-request disconnection", bn: "গ্রাহকের অনুরোধে বিচ্ছিন্নকরণের পর পুনঃসংযোগ", bands: [["LT — single phase","এলটি — এক ফেজ",240],["LT — three phase","এলটি — তিন ফেজ",480],["MT","এমটি",1200]] },
+    { en: "Meter testing on customer request", bn: "গ্রাহকের অনুরোধে মিটার পরীক্ষা", bands: [["LT — single phase","এলটি — এক ফেজ",240],["LT — three phase","এলটি — তিন ফেজ",480],["LT — CT","এলটি — সিটি",720],["MT","এমটি",2400]] },
+    { en: "Meter inspection at premises on request", bn: "গ্রাহকের অনুরোধে প্রাঙ্গণে মিটার পরিদর্শন", bands: [["LT — single phase","এলটি — এক ফেজ",180],["LT — three phase","এলটি — তিন ফেজ",360],["LT — CT","এলটি — সিটি",600],["MT","এমটি",1200]] },
+    { en: "Meter install / change / relocation on request", bn: "গ্রাহকের অনুরোধে মিটার স্থাপন / পরিবর্তন / স্থানান্তর", bands: [["LT — single phase","এলটি — এক ফেজ",360],["LT — three phase","এলটি — তিন ফেজ",840],["LT — CT","এলটি — সিটি",2400],["MT","এমটি",6000]] },
+    { en: "Service-drop cable repair / change / relocation", bn: "সার্ভিস ড্রপ কেবল মেরামত / পরিবর্তন / স্থানান্তর", bands: [["LT — single phase","এলটি — এক ফেজ",240],["LT — three phase","এলটি — তিন ফেজ",600],["MT","এমটি",1500]] },
+    { en: "Supply voltage correction on request", bn: "গ্রাহকের অনুরোধে সাপ্লাই ভোল্টেজ সংশোধন", bands: [["LT — single phase","এলটি — এক ফেজ",120],["LT — three phase","এলটি — তিন ফেজ",360],["MT","এমটি",1200]] },
+    { en: "Prepaid meter card re-issue", bn: "প্রিপেইড মিটার কার্ড পুনঃইস্যু", bands: [["All voltage levels","সব ভোল্টেজ স্তর",240]] },
+    { en: "Transformer oil testing on request", bn: "গ্রাহকের অনুরোধে ট্রান্সফরমার তেল পরীক্ষা", bands: [["MT","এমটি",1200]] },
+    { en: "Emergency transformer rental (with dropout fuse)", bn: "জরুরি ট্রান্সফরমার ভাড়া (ড্রপআউট ফিউজসহ)", bands: [["First 30 days · per kVA / day","প্রথম ৩০ দিন · প্রতি কেভিএ / দিন",2.5],["After 30 days · per kVA / day","৩০ দিনের পর · প্রতি কেভিএ / দিন",5]] },
+  ];
+  const APPL = [
+    { id: "fan", en: "Ceiling fan", bn: "সিলিং ফ্যান", w: 75, h: 12 },
+    { id: "led", en: "LED bulb", bn: "এলইডি বাল্ব", w: 9, h: 6 },
+    { id: "tv", en: "LED television", bn: "এলইডি টেলিভিশন", w: 80, h: 5 },
+    { id: "fridge", en: "Refrigerator", bn: "ফ্রিজ", w: 150, h: 8 },
+    { id: "ac15", en: "AC 1.5 ton", bn: "এসি ১.৫ টন", w: 1500, h: 8 },
+    { id: "ac1", en: "AC 1 ton", bn: "এসি ১ টন", w: 1000, h: 8 },
+    { id: "iron", en: "Iron", bn: "ইস্ত্রি", w: 1000, h: 0.5 },
+    { id: "pump", en: "Water pump", bn: "পানি পাম্প", w: 750, h: 1 },
+    { id: "rice", en: "Rice cooker", bn: "রাইস কুকার", w: 400, h: 1 },
+    { id: "pc", en: "Desktop computer", bn: "ডেস্কটপ কম্পিউটার", w: 120, h: 6 },
+    { id: "router", en: "Wi-Fi router", bn: "ওয়াই-ফাই রাউটার", w: 10, h: 24 },
+    { id: "washer", en: "Washing machine", bn: "ওয়াশিং মেশিন", w: 500, h: 1 },
+    { id: "heater", en: "Geyser / water heater", bn: "গিজার / ওয়াটার হিটার", w: 2000, h: 1 },
+    { id: "microwave", en: "Microwave", bn: "মাইক্রোওয়েভ", w: 1200, h: 0.3 },
+  ];
+  const JUMPS = ["LT-A", "LT-E", "LT-C1", "LT-D3", "LT-B"];
+  const ICONS = {
+    "LT-A": "⌂", "LT-E": "▤", "LT-C1": "⚙", "LT-D3": "⚡", "LT-B": "☘",
+  };
+  const COPY = {
+    en: {
+      brand: "Bilghor", tagline: "NESCO electricity tariff & bill calculator",
+      updated: "NESCO · BERC June 2026 tariff",
+      nav: { calc: "Calculator", tariff: "Tariff", compare: "Compare", tools: "Tools", guides: "Guides", faq: "Questions" },
+      heroTitle: "What will this month cost?",
+      heroLead: "Enter your NESCO meter category and units. Bilghor applies BERC slabs, demand charge, 5% VAT, prepaid rebate, and optional meter rent.",
+      which: "Which rate applies to you?",
+      calc: { category: "Consumer category", units: "Monthly units (kWh)", unitsHint: "Current reading minus previous reading.", peak: "Peak units", offPeak: "Off-peak units", superOffPeak: "Super off-peak units", load: "Sanctioned load (kW)", loadHint: "Printed on your bill as connected / sanctioned load.", prepaidChoice: "Prepaid", postpaid: "Postpaid", meterType: "Meter type", meterRent: "Include meter rent?", meterRentHint: "Added after VAT — not taxed.", meterRentLine: "Meter rent", yes: "Yes", no: "No", phase: "Connection", singlePhase: "Single phase", threePhase: "Three phase", calculate: "Calculate bill", reset: "Reset", split: "Split total by peak hours", splitHint: "Have a single unit total? We’ll split it by the official peak window.", totalUnits: "Total units to split", result: "Estimated bill", energy: "Energy charge", demand: "Demand charge", subtotal: "Subtotal", vat: "VAT 5%", prepaidRebate: "Prepaid rebate 0.5%", total: "Total payable", effective: "Effective energy rate", perUnit: "per unit", breakdown: "Slab analysis", shareOfTotal: "Share of the total bill", otherCharges: "Other charges", empty: "Enter units to see a bill.", vsFeb2024: "Versus February 2024 tariff", feb2024Bill: "February 2024 bill", higherBy: "Higher by", lowerBy: "Lower by", sameAsFeb2024: "Same total as the February 2024 tariff.", feb2024Note: "Same units and load. Energy rates from BERC SRO 43 of 29 February 2024." },
+      tariff: { title: "Electricity tariff rates", lead: "All LT and MT categories from the BERC order used for the June 2026 billing cycle — the rates NESCO bills.", demand: "Demand", perKva: "/kVA", perKwh: "/kWh", lifeline: "Lifeline", peak: "Peak", offPeak: "Off-peak", super: "Super off-peak", misc: "Misc. fees", miscLead: "Application, disconnection, meter, and transformer charges published with the tariff.", notesTitle: "How the rates work" },
+      notes: ["The ৳4.63 lifeline rate applies only if total monthly use is 50 units or less. Use more than 50 and the regular slabs start at the 0–75 step.", "Peak hours are generally 5:00 PM to 11:00 PM.", "Off-peak is generally 11:00 PM to 5:00 PM the next day. For LT-D3 and MT-7: 11:00 PM–5:00 AM and 9:00 AM–5:00 PM.", "Super off-peak (5:00 AM–9:00 AM) applies only to LT-D3 and MT-7.", "VAT is 5% on energy plus demand, after the prepaid rebate if any.", "Prepaid meter rebate: 0.5% on net bill excluding VAT."],
+      compare: { title: "Compare two categories", lead: "Same units, two tariffs — useful when a shop could be LT-E or a small factory LT-C1.", a: "Category A", b: "Category B", difference: "Difference", cheaper: "is cheaper by", same: "These two bills match." },
+      tools: { title: "More calculators", appliance: "Appliance cost", applianceLead: "What a fan, fridge, or AC adds to a 30-day bill.", converter: "Watt → units", converterLead: "Convert wattage and hours into monthly kilowatt-hours.", reverse: "Taka → units", reverseLead: "You know the bill amount. Estimate the units behind it.", prepaid: "Prepaid vs postpaid", prepaidLead: "Same usage, both meter types.", watts: "Watts", hours: "Hours per day", days: "Days per month", qty: "Quantity", add: "Add appliance", monthlyKwh: "Monthly units", monthlyCost: "Monthly cost", rate: "Rate per unit", billAmount: "Bill amount (৳)", estimatedUnits: "Estimated units", save: "Prepaid saves", fromList: "Add from list" },
+      guides: { title: "How Bangladesh electricity bills work", lead: "Read the paper bill, run the slabs, demand, VAT, rebates, and categories — in one place." },
+      faq: { title: "Questions", lead: "How the bill is built: slabs, demand, VAT, prepaid rebate, and meter rent.", items: [
+        ["How is the bill calculated?", "Energy (units × slab or time-of-use rate), demand (sanctioned kW × demand charge), and 5% VAT. Prepaid takes 0.5% off the net and can add meter rent — ৳40 single phase or ৳250 three phase."],
+        ["Whose rates does NESCO use?", "NESCO bills the national BERC tariff. This calculator follows the June 2026 billing cycle."],
+        ["What is the lifeline rate?", "If a residential (LT-A) meter uses 50 units or fewer in a month, every unit is billed at ৳4.63. Cross 50 and the ordinary 0–75 slab at ৳5.26 applies from the first unit."],
+        ["Is meter rent included?", "On prepaid, choose Yes under meter rent, then single phase (৳40) or three phase (৳250). Postpaid does not add meter rent here. Fuel surcharge is not included."],
+        ["Should I switch to a time-of-use meter?", "If you can shift load out of 5–11 PM, off-peak units are cheaper on commercial, industrial, and EV categories. Residential LT-A is still a monthly slab, not TOU."],
+      ]},
+      footer: { copyright: "© 2026 Bilghor", developedBy: "Developed by নাসিম বিন জসিম" },
+      kwh: "kWh",
+    },
+    bn: {
+      brand: "বিলঘর", tagline: "নেসকোর বিদ্যুৎ ট্যারিফ ও বিল ক্যালকুলেটর",
+      updated: "নেসকো · বিইআরসি জুন ২০২৬ ট্যারিফ",
+      nav: { calc: "ক্যালকুলেটর", tariff: "ট্যারিফ", compare: "তুলনা", tools: "টুলস", guides: "গাইড", faq: "প্রশ্ন" },
+      heroTitle: "এই মাসের বিল কত?",
+      heroLead: "নেসকো মিটার ক্যাটাগরি ও ইউনিট দিন। বিলঘর বিইআরসির স্ল্যাব, ডিমান্ড চার্জ, ৫% ভ্যাট, প্রিপেইড ছাড় ও মিটার ভাড়া প্রয়োগ করে।",
+      which: "আপনার হার কোনটি?",
+      calc: { category: "গ্রাহক ক্যাটাগরি", units: "মাসিক ইউনিট (কিলোওয়াট-ঘণ্টা)", unitsHint: "বর্তমান রিডিং থেকে আগের রিডিং বাদ দিন।", peak: "পিক ইউনিট", offPeak: "অফ-পিক ইউনিট", superOffPeak: "সুপার অফ-পিক ইউনিট", load: "অনুমোদিত লোড (কিলোওয়াট)", loadHint: "বিলের কাগজে লেখা সংযুক্ত / অনুমোদিত লোড।", prepaidChoice: "প্রিপেইড", postpaid: "পোস্টপেইড", meterType: "মিটারের ধরন", meterRent: "মিটার ভাড়া যোগ করবেন?", meterRentHint: "ভ্যাটের পর যোগ হয় — ভ্যাট হয় না।", meterRentLine: "মিটার ভাড়া", yes: "হ্যাঁ", no: "না", phase: "সংযোগ", singlePhase: "এক ফেজ", threePhase: "থ্রি ফেজ", calculate: "বিল হিসাব করুন", reset: "রিসেট", split: "পিক ঘণ্টা অনুযায়ী ভাগ করুন", splitHint: "শুধু মোট ইউনিট জানেন? অফিসিয়াল পিক সময় অনুযায়ী ভাগ করে দেব।", totalUnits: "ভাগ করার মোট ইউনিট", result: "আনুমানিক বিল", energy: "এনার্জি চার্জ", demand: "ডিমান্ড চার্জ", subtotal: "উপমোট", vat: "ভ্যাট ৫%", prepaidRebate: "প্রিপেইড ছাড় ০.৫%", total: "মোট পরিশোধ্য", effective: "কার্যকর এনার্জি হার", perUnit: "প্রতি ইউনিট", breakdown: "স্লাব বিশ্লেষণ", shareOfTotal: "মোট বিলের অংশ", otherCharges: "অন্যান্য চার্জ", empty: "বিল দেখতে ইউনিট লিখুন।", vsFeb2024: "ফেব্রুয়ারি ২০২৪ ট্যারিফের তুলনায়", feb2024Bill: "ফেব্রুয়ারি ২০২৪-এর বিল", higherBy: "বেশি", lowerBy: "কম", sameAsFeb2024: "ফেব্রুয়ারি ২০২৪ ট্যারিফের সাথে মোট একই।", feb2024Note: "একই ইউনিট ও লোড। এনার্জি হার বিইআরসি এস.আর.ও. ৪৩ আইন/২০২৪ (২৯ ফেব্রুয়ারি ২০২৪)।" },
+      tariff: { title: "বিদ্যুৎ ট্যারিফ হার", lead: "জুন ২০২৬ বিলিং চক্রের বিইআরসি আদেশ অনুযায়ী সব এলটি ও এমটি ক্যাটাগরি — নেসকো এই হারে বিল করে।", demand: "ডিমান্ড", perKva: "/কেভিএ", perKwh: "/কিলোওয়াট-ঘণ্টা", lifeline: "লাইফলাইন", peak: "পিক", offPeak: "অফ-পিক", super: "সুপার অফ-পিক", misc: "বিবিধ ফি", miscLead: "ট্যারিফের সাথে প্রকাশিত আবেদন, বিচ্ছিন্নকরণ, মিটার ও ট্রান্সফরমার চার্জ।", notesTitle: "হার কীভাবে কাজ করে" },
+      notes: ["৳৪.৬৩ লাইফলাইন হার কেবল তখনই প্রযোজ্য যখন মাসিক ব্যবহার ৫০ ইউনিট বা তার কম। ৫০-এর বেশি হলে সাধারণ ০–৭৫ স্ল্যাব থেকে হিসাব হয়।", "পিক সময় সাধারণত বিকেল ৫টা থেকে রাত ১১টা।", "অফ-পিক সাধারণত রাত ১১টা থেকে পরদিন বিকেল ৫টা। এলটি-ডি৩ ও এমটি-৭-এর জন্য: রাত ১১টা–ভোর ৫টা এবং সকাল ৯টা–বিকেল ৫টা।", "সুপার অফ-পিক (ভোর ৫টা–সকাল ৯টা) শুধু এলটি-ডি৩ ও এমটি-৭-এ প্রযোজ্য।", "ভ্যাট ৫% — প্রিপেইড ছাড় থাকলে তার পর এনার্জি ও ডিমান্ডের উপর।", "প্রিপেইড মিটার ছাড়: ভ্যাট বাদে নেট বিলের ০.৫%।"],
+      compare: { title: "দুই ক্যাটাগরি তুলনা করুন", lead: "একই ইউনিট, দুই ট্যারিফ — দোকান এলটি-ই না ক্ষুদ্র কারখানা এলটি-সি১, তা যাচাই করতে।", a: "ক্যাটাগরি ক", b: "ক্যাটাগরি খ", difference: "পার্থক্য", cheaper: "সস্তা", same: "দুই বিল একই।" },
+      tools: { title: "আরও ক্যালকুলেটর", appliance: "যন্ত্রের খরচ", applianceLead: "ফ্যান, ফ্রিজ বা এসি ৩০ দিনে বিলে কত যোগ করে।", converter: "ওয়াট → ইউনিট", converterLead: "ওয়াটেজ ও ঘণ্টা থেকে মাসিক কিলোওয়াট-ঘণ্টা।", reverse: "টাকা → ইউনিট", reverseLead: "বিলের অঙ্ক জানেন। পেছনের ইউনিট অনুমান করুন।", prepaid: "প্রিপেইড বনাম পোস্টপেইড", prepaidLead: "একই ব্যবহার, দুই ধরনের মিটার।", watts: "ওয়াট", hours: "দিনে ঘণ্টা", days: "মাসে দিন", qty: "সংখ্যা", add: "যন্ত্র যোগ করুন", monthlyKwh: "মাসিক ইউনিট", monthlyCost: "মাসিক খরচ", rate: "প্রতি ইউনিট হার", billAmount: "বিলের অঙ্ক (৳)", estimatedUnits: "আনুমানিক ইউনিট", save: "প্রিপেইড সাশ্রয়", fromList: "তালিকা থেকে যোগ" },
+      guides: { title: "বাংলাদেশে বিদ্যুৎ বিল: পুরো গাইড", lead: "বিলের কাগজ পড়া, স্ল্যাব হিসাব, ডিমান্ড চার্জ, ভ্যাট, ছাড় ও ক্যাটাগরি — এক জায়গায়, বাংলায়।" },
+      faq: { title: "প্রশ্ন", lead: "বিল কীভাবে গঠিত: স্ল্যাব, ডিমান্ড, ভ্যাট, প্রিপেইড ছাড় ও মিটার ভাড়া।", items: [
+        ["বিল কীভাবে হিসাব হয়?", "এনার্জি (ইউনিট × স্ল্যাব বা টাইম-অফ-ইউজ হার), ডিমান্ড (অনুমোদিত কিলোওয়াট × ডিমান্ড চার্জ) এবং ৫% ভ্যাট। প্রিপেইডে নেটের ০.৫% ছাড়। প্রিপেইডে মিটার ভাড়া যোগ করা যায় — এক ফেজ ৳৪০, থ্রি ফেজ ৳২৫০।"],
+        ["নেসকো কোন হারে বিল করে?", "নেসকো জাতীয় বিইআরসি ট্যারিফে বিল করে। এই ক্যালকুলেটর জুন ২০২৬ বিলিং চক্র অনুসরণ করে।"],
+        ["লাইফলাইন হার কী?", "আবাসিক (এলটি-এ) মিটারে এক মাসে ৫০ ইউনিট বা কম ব্যবহার হলে প্রতি ইউনিট ৳৪.৬৩। ৫০ ছাড়ালে প্রথম ইউনিট থেকেই সাধারণ ০–৭৫ স্ল্যাব ৳৫.২৬ প্রযোজ্য।"],
+        ["মিটার ভাড়া কি হিসাবে আছে?", "প্রিপেইড সিলেক্ট করে মিটার ভাড়ায় হ্যাঁ দিন, তারপর এক ফেজ (৳৪০) বা থ্রি ফেজ (৳২৫০)। পোস্টপেইডে এখানে মিটার ভাড়া যোগ হয় না। ফুয়েল সারচার্জ নেই।"],
+        ["টাইম-অফ-ইউজ মিটারে যাওয়া উচিত?", "বিকেল ৫টা–রাত ১১টার বাইরে লোড সরাতে পারলে বাণিজ্যিক, শিল্প ও ইভি ক্যাটাগরিতে অফ-পিক সস্তা। আবাসিক এলটি-এ এখনও মাসিক স্ল্যাব, টিওইউ নয়।"],
+      ]},
+      footer: { copyright: "© ২০২৬ বিলঘর", developedBy: "Developed by নাসিম বিন জসিম" },
+      kwh: "কিলোওয়াট-ঘণ্টা",
+    },
+  };
+
+  const S = {
+    lang: "bn", theme: "light", page: "calc", menu: false,
+    tariffLevel: "LT", tool: "appliance",
+    input: { categoryId: "LT-A", units: 200, peak: 0, off: 0, super: 0, loadKw: 1, prepaid: false, meterRent: false, phase: "single" },
+    splitTotal: 200,
+    cmp: { a: "LT-A", b: "LT-E", units: 200, loadKw: 1, prepaid: false },
+    appl: { rate: 8.5, days: 30, rows: [
+      { id: "1", name: "সিলিং ফ্যান", w: 75, h: 12, q: 3 },
+      { id: "2", name: "এলইডি বাল্ব", w: 9, h: 6, q: 8 },
+      { id: "3", name: "ফ্রিজ", w: 150, h: 8, q: 1 },
+    ]},
+    conv: { w: 75, h: 12, d: 30, q: 1 },
+    rev: { amount: 1574, categoryId: "LT-A", loadKw: 1, prepaid: false, meterRent: false, phase: "single" },
+  };
+
+  try {
+    const saved = JSON.parse(localStorage.getItem("bilghor-html") || "{}");
+    if (saved.lang === "en" || saved.lang === "bn") S.lang = saved.lang;
+    if (saved.theme === "dark" || saved.theme === "light") S.theme = saved.theme;
+  } catch (e) {}
+
+  const NAV = ["calc", "tariff", "compare", "tools", "guides", "faq"];
+  const TONES = ["t-primary", "t-70", "t-45", "t-peak", "t-off", "t-mint"];
+
+  function t() { return COPY[S.lang]; }
+  function save() { localStorage.setItem("bilghor-html", JSON.stringify({ lang: S.lang, theme: S.theme })); }
+  function round2(n) { return Math.round(n * 100) / 100; }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&", "<": "<", ">": ">", '"': "&#34;", "'": "&#39;" }[ch]));
+  }
+  function loc() { return S.lang === "bn" ? "bn-BD" : "en-BD"; }
+  function fmtN(n, d) { return Number(n).toLocaleString(loc(), { minimumFractionDigits: d ?? 0, maximumFractionDigits: d ?? 0 }); }
+  function taka(n) { return "৳" + round2(n).toLocaleString(loc(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function cat(id) { return CATS.find((c) => c.id === id); }
+  function withFeb(c) { const p = FEB[c.id]; return p ? Object.assign({}, c, p) : c; }
+  function rent(inp) { if (!inp.prepaid || !inp.meterRent) return 0; return inp.phase === "three" ? RENT_3 : RENT_1; }
+  function hasSuper(c) { return !!(c.tou && c.tou.superOffPeak != null); }
+  function splitHours(total, c) {
+    if (!c.tou) return { peak: 0, off: total, super: 0 };
+    if (c.tou.superOffPeak != null) return { peak: round2(total * 6 / 24), super: round2(total * 4 / 24), off: round2(total * 14 / 24) };
+    return { peak: round2(total * 6 / 24), off: round2(total * 18 / 24), super: 0 };
+  }
+  function bill(inp, override) {
+    const c = override || cat(inp.categoryId);
+    if (!c) return null;
+    const load = Math.max(0, +inp.loadKw || 0);
+    const lines = [];
+    if (c.kind === "slab") {
+      const units = Math.max(0, +inp.units || 0);
+      if (c.lifeline && units > 0 && units <= c.lifeline.max) {
+        lines.push({ id: "lifeline", en: "Lifeline 0 – " + c.lifeline.max, bn: "লাইফলাইন ০ – " + c.lifeline.max, detail: units + " × ৳" + c.lifeline.rate.toFixed(2), amount: round2(units * c.lifeline.rate) });
+      } else {
+        let rem = units;
+        (c.slabs || []).forEach((s) => {
+          if (rem <= 0) return;
+          const width = s.to == null ? rem : s.to - s.from;
+          const kwh = Math.min(rem, width);
+          if (kwh <= 0) return;
+          lines.push({ id: "slab-" + s.from, en: s.en, bn: s.bn, detail: round2(kwh) + " × ৳" + s.rate.toFixed(2), amount: round2(kwh * s.rate) });
+          rem = round2(rem - kwh);
+        });
+      }
+    } else if (c.kind === "flat") {
+      const units = Math.max(0, +inp.units || 0);
+      const rate = c.flat || 0;
+      lines.push({ id: "flat", en: "Energy", bn: "এনার্জি", detail: round2(units) + " × ৳" + rate.toFixed(2), amount: round2(units * rate) });
+    } else if (c.tou) {
+      const peak = Math.max(0, +inp.peak || 0), off = Math.max(0, +inp.off || 0), sup = Math.max(0, +inp.super || 0);
+      if (peak > 0) lines.push({ id: "peak", en: "Peak", bn: "পিক", detail: round2(peak) + " × ৳" + c.tou.peak.toFixed(2), amount: round2(peak * c.tou.peak) });
+      if (off > 0) lines.push({ id: "offpeak", en: "Off-peak", bn: "অফ-পিক", detail: round2(off) + " × ৳" + c.tou.offPeak.toFixed(2), amount: round2(off * c.tou.offPeak) });
+      if (sup > 0 && c.tou.superOffPeak != null) lines.push({ id: "super", en: "Super off-peak", bn: "সুপার অফ-পিক", detail: round2(sup) + " × ৳" + c.tou.superOffPeak.toFixed(2), amount: round2(sup * c.tou.superOffPeak) });
+    }
+    const energy = round2(lines.reduce((s, l) => s + l.amount, 0));
+    const demand = round2(load * c.demand);
+    const subtotal = round2(energy + demand);
+    const prepaidRebate = inp.prepaid ? round2(subtotal * PREPAID) : 0;
+    const after = round2(subtotal - prepaidRebate);
+    const vat = round2(after * VAT);
+    const mrent = rent(inp);
+    const total = round2(after + vat + mrent);
+    const units = c.kind === "tou" ? (+inp.peak || 0) + (+inp.off || 0) + (+inp.super || 0) : (+inp.units || 0);
+    return { c, energy, demand, subtotal, prepaidRebate, vat, meterRent: mrent, total, units, lines, effective: units > 0 ? round2(energy / units) : 0 };
+  }
+  function unitsForBill(target, inp) {
+    const c = cat(inp.categoryId);
+    if (!c || target <= 0) return null;
+    const demand = Math.max(0, inp.loadKw) * c.demand;
+    const r = rent(inp);
+    const payable = Math.max(0, target - r);
+    const rebateMul = 1 - (inp.prepaid ? PREPAID : 0);
+    const energyNeeded = payable / (1 + VAT) / rebateMul - demand;
+    if (energyNeeded <= 0) return 0;
+    if (c.kind === "flat" && c.flat) return round2(energyNeeded / c.flat);
+    if (c.kind === "tou" && c.tou) {
+      const split = c.tou.superOffPeak != null ? { p: 6 / 24, o: 14 / 24, s: 4 / 24 } : { p: 6 / 24, o: 18 / 24, s: 0 };
+      const blended = split.p * c.tou.peak + split.o * c.tou.offPeak + split.s * (c.tou.superOffPeak || 0);
+      return blended > 0 ? round2(energyNeeded / blended) : null;
+    }
+    let lo = 0, hi = 20000;
+    for (let i = 0; i < 40; i++) {
+      const mid = (lo + hi) / 2;
+      const res = bill(Object.assign({}, inp, { units: mid, peak: 0, off: 0, super: 0 }));
+      if (!res) return null;
+      if (res.total > target) hi = mid; else lo = mid;
+    }
+    return round2(lo);
+  }
+  function toneFor(id, i) {
+    if (id === "peak") return "t-peak";
+    if (id === "offpeak") return "t-off";
+    if (id === "super") return "t-mint";
+    return TONES[i % TONES.length];
+  }
+  function opts(selected) {
+    return ["LT", "MT"].map((v) => {
+      const items = CATS.filter((c) => c.v === v).map((c) => `<option value="${c.id}" ${c.id === selected ? "selected" : ""}>${c.id} — ${S.lang === "bn" ? c.nameBn : c.nameEn}</option>`).join("");
+      const label = v === "LT" ? (S.lang === "bn" ? "LT · লো টেনশন (230/400V)" : "LT · Low Tension (230/400V)") : (S.lang === "bn" ? "MT · মিডিয়াম টেনশন (11kV)" : "MT · Medium Tension (11kV)");
+      return `<optgroup label="${label}">${items}</optgroup>`;
+    }).join("");
+  }
+  function chip(on, fn, label) {
+    return `<button type="button" class="chip ${on ? "on" : ""}" onclick="${fn}">${label}</button>`;
+  }
+  function go(page) {
+    S.page = page; S.menu = false;
+    history.replaceState(null, "", "#" + page);
+    window.scrollTo(0, 0);
+    render();
+  }
+  window.go = go;
+  window.setLang = function (lang) {
+    S.lang = lang; save();
+    if (S.appl.rows[0] && (S.appl.rows[0].name === "Ceiling fan" || S.appl.rows[0].name === "সিলিং ফ্যান")) {
+      S.appl.rows[0].name = lang === "bn" ? "সিলিং ফ্যান" : "Ceiling fan";
+      S.appl.rows[1].name = lang === "bn" ? "এলইডি বাল্ব" : "LED bulb";
+      S.appl.rows[2].name = lang === "bn" ? "ফ্রিজ" : "Refrigerator";
+    }
+    render();
+  };
+  window.toggleTheme = function () { S.theme = S.theme === "dark" ? "light" : "dark"; save(); applyTheme(); render(); };
+  window.toggleMenu = function () { S.menu = !S.menu; document.getElementById("nav-mob").classList.toggle("open", S.menu); };
+  window.setPrepaid = function (v) { S.input.prepaid = v; if (!v) S.input.meterRent = false; render(); };
+  window.setRent = function (v) { S.input.meterRent = v; render(); };
+  window.setPhase = function (v) { S.input.phase = v; render(); };
+  window.setCat = function (id) {
+    S.input.categoryId = id;
+    const c = cat(id);
+    if (c && c.kind === "tou" && S.input.units > 0 && S.input.peak + S.input.off === 0) {
+      const s = splitHours(S.input.units, c);
+      S.input.peak = s.peak; S.input.off = s.off; S.input.super = s.super;
+    }
+    render();
+  };
+  window.setNum = function (key, el) { S.input[key] = Number(el.value); render(); };
+  window.setSplit = function (el) { S.splitTotal = Number(el.value); };
+  window.doSplit = function () {
+    const c = cat(S.input.categoryId); if (!c) return;
+    const s = splitHours(S.splitTotal, c);
+    S.input.peak = s.peak; S.input.off = s.off; S.input.super = s.super; render();
+  };
+  window.resetInput = function () {
+    S.input = { categoryId: "LT-A", units: 200, peak: 0, off: 0, super: 0, loadKw: 1, prepaid: false, meterRent: false, phase: "single" };
+    render();
+  };
+  window.jump = function (id) { S.input.categoryId = id; S.page = "calc"; render(); document.getElementById("bill-form")?.scrollIntoView({ behavior: "smooth" }); };
+  window.setTariff = function (lv) { S.tariffLevel = lv; render(); };
+  window.setTool = function (id) { S.tool = id; render(); };
+  window.setCmp = function (side, el) { S.cmp[side] = el.type === "checkbox" || el.type === "number" ? (el.type === "checkbox" ? el.checked : Number(el.value)) : el.value; if (side === "a" || side === "b") S.cmp[side] = el.value; render(); };
+  window.setCmpCat = function (side, el) { S.cmp[side] = el.value; render(); };
+  window.setCmpNum = function (key, el) { S.cmp[key] = Number(el.value); render(); };
+  window.setCmpPre = function (v) { S.cmp.prepaid = v; render(); };
+  window.addAppl = function () { S.appl.rows.push({ id: String(Date.now()), name: S.lang === "bn" ? "নতুন যন্ত্র" : "New appliance", w: 100, h: 4, q: 1 }); render(); };
+  window.addFromList = function (el) {
+    const a = APPL.find((x) => x.id === el.value); if (!a) return;
+    S.appl.rows.push({ id: String(Date.now()), name: S.lang === "bn" ? a.bn : a.en, w: a.w, h: a.h, q: 1 });
+    el.value = ""; render();
+  };
+  window.updAppl = function (i, k, el) { S.appl.rows[i][k] = k === "name" ? el.value : Number(el.value); render(); };
+  window.delAppl = function (i) { S.appl.rows.splice(i, 1); render(); };
+  window.setApplMeta = function (k, el) { S.appl[k] = Number(el.value); render(); };
+  window.setConv = function (k, el) { S.conv[k] = Number(el.value); render(); };
+  window.setRev = function (k, el) { S.rev[k] = el.type === "number" ? Number(el.value) : el.value; render(); };
+  window.setRevPre = function (v) { S.rev.prepaid = v; if (!v) S.rev.meterRent = false; render(); };
+  window.setRevRent = function (v) { S.rev.meterRent = v; render(); };
+  window.setRevPhase = function (v) { S.rev.phase = v; render(); };
+  window.scrollResult = function () { document.getElementById("bill-result")?.scrollIntoView({ behavior: "smooth", block: "start" }); };
+
+  function applyTheme() {
+    document.documentElement.classList.toggle("dark", S.theme === "dark");
+    document.documentElement.lang = S.lang;
+  }
+  function navHtml(cls) {
+    const c = t();
+    return NAV.map((k) => `<a href="#${k}" class="${S.page === k ? "on" : ""}" onclick="event.preventDefault();go('${k}')">${c.nav[k]}</a>`).join("");
+  }
+  function resultCard(res, inp) {
+    const c = t().calc;
+    if (!res) return `<div class="card card-lg" id="bill-result"><p class="muted">${c.empty}</p></div>`;
+    const prev = bill(inp, withFeb(cat(inp.categoryId)));
+    const delta = prev ? round2(res.total - prev.total) : 0;
+    const pct = prev && prev.total > 0 ? round2((delta / prev.total) * 100) : 0;
+    const rows = [
+      [c.energy, res.energy],
+      [c.demand, res.demand],
+      [c.subtotal, res.subtotal],
+    ];
+    if (res.prepaidRebate > 0) rows.push([c.prepaidRebate, -res.prepaidRebate]);
+    rows.push([c.vat, res.vat]);
+    if (res.meterRent > 0) rows.push([c.meterRentLine, res.meterRent]);
+    let cmp = "";
+    if (prev) {
+      let body;
+      if (Math.abs(delta) < 0.05) body = `<p style="margin:6px 0 0;font-weight:500">${c.sameAsFeb2024}</p>`;
+      else {
+        const lab = S.lang === "bn"
+          ? `${taka(Math.abs(delta))} ${delta > 0 ? c.higherBy : c.lowerBy}`
+          : `${delta > 0 ? c.higherBy : c.lowerBy} ${taka(Math.abs(delta))}`;
+        body = `<p style="margin:8px 0 0;font-family:var(--display);font-size:1.25rem;font-weight:600;color:${delta > 0 ? "var(--peak)" : "var(--primary)"}">${lab} <span class="muted" style="font-size:14px">(${delta > 0 ? "+" : "−"}${fmtN(Math.abs(pct), 1)}%)</span></p>`;
+      }
+      cmp = `<div class="mint-box"><p style="font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--primary);margin:0">${c.vsFeb2024}</p>${body}<p class="muted" style="margin:8px 0 0;font-size:14px">${c.feb2024Bill}: ${taka(prev.total)}</p><p class="subtle" style="margin:6px 0 0;font-size:12px;line-height:1.5">${c.feb2024Note}</p></div>`;
+    }
+    let slabs = "";
+    if (res.lines.length) {
+      const total = res.total > 0 ? res.total : 1;
+      const energySum = res.lines.reduce((s, l) => s + l.amount, 0);
+      const rest = Math.max(0, round2(res.total - energySum));
+      const segs = res.lines.map((l, i) => ({ id: l.id, label: S.lang === "bn" ? l.bn : l.en, amount: l.amount, tone: toneFor(l.id, i) }));
+      if (rest > 0.04) segs.push({ id: "rest", label: c.otherCharges, amount: rest, tone: "t-rest" });
+      slabs = `<div style="margin-top:24px"><p style="margin:0;font-weight:500">${c.breakdown}</p><p class="subtle" style="margin:2px 0 0;font-size:12px">${c.shareOfTotal}</p>
+        <div class="bar-track" role="img" aria-label="${c.shareOfTotal}">${segs.map((s) => { const p = (s.amount / total) * 100; return p < 0.15 ? "" : `<span class="${s.tone}" style="width:${p}%"></span>`; }).join("")}</div>
+        <ul class="legend">${segs.map((s) => `<li><span class="dot ${s.tone}"></span>${s.label}</li>`).join("")}</ul>
+        ${res.lines.map((l, i) => { const p = (l.amount / total) * 100; return `<div class="slab-row"><div style="display:flex;justify-content:space-between;gap:12px"><div><p style="margin:0;font-size:14px">${S.lang === "bn" ? l.bn : l.en}</p><p class="subtle" style="margin:2px 0 0;font-size:12px;font-variant-numeric:tabular-nums">${l.detail}</p></div><p style="margin:0;font-weight:500;font-variant-numeric:tabular-nums;font-size:14px">${taka(l.amount)}</p></div><div style="display:flex;align-items:center;gap:12px;margin-top:8px"><div class="mini"><i class="${toneFor(l.id, i)}" style="width:${Math.min(100, Math.max(1.5, p))}%"></i></div><span class="muted" style="font-size:12px;font-variant-numeric:tabular-nums">${fmtN(p, 1)}%</span></div></div>`; }).join("")}
+      </div>`;
+    }
+    return `<div class="card card-lg" id="bill-result">
+      <p class="muted" style="margin:0;font-size:14px;font-weight:500">${c.result}</p>
+      <p class="total" style="margin:8px 0 0">${taka(res.total)}</p>
+      <p class="muted" style="margin:8px 0 0;font-size:14px">${S.lang === "bn" ? res.c.nameBn : res.c.nameEn} · ${res.c.id} · ${fmtN(res.units, res.units % 1 ? 2 : 0)} ${t().kwh}</p>
+      ${cmp}
+      <div class="rows">${rows.map((r) => `<div><span class="muted">${r[0]}</span><span style="font-variant-numeric:tabular-nums;font-weight:500">${taka(r[1])}</span></div>`).join("")}<div><span>${c.total}</span><span style="font-family:var(--display);font-size:1.25rem;color:var(--primary)">${taka(res.total)}</span></div></div>
+      ${slabs}
+      <p class="subtle" style="margin:24px 0 0;font-size:12px">${c.effective}: ${taka(res.effective)} ${c.perUnit}</p>
+    </div>`;
+  }
+  function formCard() {
+    const c = t().calc;
+    const inp = S.input;
+    const current = cat(inp.categoryId);
+    const tou = current && current.kind === "tou";
+    const superOff = current && hasSuper(current);
+    return `<div class="card card-lg" id="bill-form">
+      <div style="display:grid;gap:20px">
+        <div><p class="lbl">${c.meterType}</p><div class="choices">${chip(!inp.prepaid, "setPrepaid(false)", c.postpaid)}${chip(inp.prepaid, "setPrepaid(true)", c.prepaidChoice)}</div></div>
+        ${inp.prepaid ? `<div><p class="lbl">${c.meterRent}</p><div class="choices">${chip(!inp.meterRent, "setRent(false)", c.no)}${chip(inp.meterRent, "setRent(true)", c.yes)}</div><p class="hint">${c.meterRentHint}</p></div>` : ""}
+        ${inp.prepaid && inp.meterRent ? `<div><p class="lbl">${c.phase}</p><div class="choices">${chip(inp.phase === "single", "setPhase('single')", c.singlePhase + " · " + taka(RENT_1))}${chip(inp.phase === "three", "setPhase('three')", c.threePhase + " · " + taka(RENT_3))}</div></div>` : ""}
+        <div><label class="lbl">${c.category}</label><select onchange="setCat(this.value)">${opts(inp.categoryId)}</select>${current ? `<p class="hint">${S.lang === "bn" ? current.descBn : current.descEn}</p>` : ""}</div>
+        ${tou ? `<div style="background:color-mix(in oklab,var(--mint) 40%,transparent);border-radius:12px;padding:12px"><p class="hint" style="margin:0">${c.splitHint}</p><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:end"><div style="flex:1;min-width:140px"><label class="lbl">${c.totalUnits}</label><input type="number" min="0" value="${S.splitTotal}" onchange="setSplit(this)" /></div><button type="button" class="btn btn-sec" onclick="doSplit()">${c.split}</button></div></div>
+          <div style="display:grid;gap:16px;grid-template-columns:${superOff ? "1fr 1fr 1fr" : "1fr 1fr"}"><div><label class="lbl">${c.peak}</label><input type="number" step="0.01" value="${inp.peak}" onchange="setNum('peak', this)" /></div><div><label class="lbl">${c.offPeak}</label><input type="number" step="0.01" value="${inp.off}" onchange="setNum('off', this)" /></div>${superOff ? `<div><label class="lbl">${c.superOffPeak}</label><input type="number" step="0.01" value="${inp.super}" onchange="setNum('super', this)" /></div>` : ""}</div>` : `<div><label class="lbl">${c.units}</label><input type="number" min="0" value="${inp.units}" onchange="setNum('units', this)" /><p class="hint">${c.unitsHint}</p></div>`}
+        <div><label class="lbl">${c.load}</label><input type="number" min="0" step="0.1" value="${inp.loadKw}" onchange="setNum('loadKw', this)" /><p class="hint">${c.loadHint}</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn" style="flex:1" onclick="scrollResult()">${c.calculate}</button><button type="button" class="btn btn-sec" onclick="resetInput()">${c.reset}</button></div>
+      </div>
+    </div>`;
+  }
+  function pageCalc() {
+    const c = t();
+    const res = bill(S.input);
+    return `<section class="hero"><div class="paper"></div><div class="wrap" style="position:relative">
+      <span class="badge">${c.updated}</span>
+      <h1 class="title" style="margin-top:16px">${c.heroTitle}</h1>
+      <p class="lead">${c.heroLead}</p>
+      <div class="grid-2" style="margin-top:32px">${formCard()}${resultCard(res, S.input)}</div>
+    </div></section>
+    <div class="wrap" style="padding:48px 0 64px">
+      <h2>${c.which}</h2>
+      <div class="jumps">${JUMPS.map((id) => { const x = cat(id); return `<button type="button" class="jump" onclick="jump('${id}')"><i>${ICONS[id] || "•"}</i><span><span class="subtle" style="font-size:12px">${id}</span><span style="display:block;font-size:14px;font-weight:500">${S.lang === "bn" ? x.shortBn : x.shortEn}</span></span></button>`; }).join("")}</div>
+      <p style="margin-top:16px"><a href="#tariff" onclick="event.preventDefault();go('tariff')">${c.nav.tariff} →</a></p>
+    </div>`;
+  }
+  function pageTariff() {
+    const c = t();
+    const lv = S.tariffLevel;
+    const list = lv === "MISC" ? [] : CATS.filter((x) => x.v === lv);
+    const filters = ["LT", "MT"].map((v) => `<button type="button" class="pill ${lv === v ? "on" : ""}" onclick="setTariff('${v}')">${v} · ${v === "LT" ? "230/400V" : "11kV"}</button>`).join("") +
+      `<button type="button" class="pill ${lv === "MISC" ? "on" : ""}" onclick="setTariff('MISC')">${c.tariff.misc}</button>`;
+    let body;
+    if (lv === "MISC") {
+      body = `<p class="muted" style="margin-top:16px">${c.tariff.miscLead}</p>` + FEES.map((g) => `<div class="card" style="margin-top:16px;padding:0;overflow:hidden"><h2 style="font-size:1rem;padding:16px 20px;border-bottom:1px solid var(--border)">${S.lang === "bn" ? g.bn : g.en}</h2><ul style="list-style:none;margin:0;padding:0">${g.bands.map((b) => `<li style="display:flex;justify-content:space-between;gap:16px;padding:12px 20px;border-bottom:1px solid var(--border);font-size:14px"><span class="muted">${S.lang === "bn" ? b[1] : b[0]}</span><span style="font-variant-numeric:tabular-nums;font-weight:500">${taka(b[2])}</span></li>`).join("")}</ul></div>`).join("");
+    } else {
+      const blurb = lv === "LT" ? (S.lang === "bn" ? "বাড়ি, দোকান, ক্ষুদ্র শিল্প ও সাধারণ সংযোগ।" : "Homes, shops, small industry, and most everyday connections.") : (S.lang === "bn" ? "বড় ভবন, কারখানা ও ১১ কেভি শিল্প ফিডার।" : "Larger buildings, factories, and 11kV industrial feeders.");
+      body = `<p class="muted" style="margin-top:16px">${blurb}</p><div class="cat-grid">${list.map((x) => {
+        let pills = "";
+        if (x.kind === "slab") pills = (x.lifeline ? `<span class="badge">${c.tariff.lifeline} ${taka(x.lifeline.rate)}</span>` : "") + (x.slabs || []).map((s) => `<span class="badge" style="background:var(--bg);color:var(--fg)">${S.lang === "bn" ? s.bn : s.en} · ${taka(s.rate)}</span>`).join(" ");
+        else if (x.kind === "flat") pills = `<p style="font-family:var(--display);font-size:1.6rem;font-weight:600;color:var(--primary);margin:16px 0 0">${taka(x.flat)} <span style="font-size:14px;font-weight:500;color:var(--muted)">${c.tariff.perKwh}</span></p>`;
+        else pills = `<span class="badge" style="background:color-mix(in oklab,var(--peak) 12%,transparent);color:var(--peak)">${c.tariff.peak} ${taka(x.tou.peak)}</span> <span class="badge">${c.tariff.offPeak} ${taka(x.tou.offPeak)}</span>` + (x.tou.superOffPeak != null ? ` <span class="badge" style="background:var(--bg);color:var(--fg)">${c.tariff.super} ${taka(x.tou.superOffPeak)}</span>` : "");
+        return `<div class="card card-lg"><div style="display:flex;justify-content:space-between;gap:12px"><div><span class="badge">${x.id}</span><h2 style="margin-top:12px;font-size:1.25rem">${S.lang === "bn" ? x.nameBn : x.nameEn}</h2><p class="muted" style="margin:6px 0 0;font-size:14px">${S.lang === "bn" ? x.descBn : x.descEn}</p></div><div style="text-align:right"><p class="subtle" style="margin:0;font-size:12px">${c.tariff.demand}</p><p style="margin:4px 0 0;font-family:var(--display);font-weight:600">${taka(x.demand)}<span class="muted" style="font-size:12px">${c.tariff.perKva}</span></p></div></div><div style="margin-top:16px;display:flex;flex-wrap:wrap;gap:6px">${pills}</div></div>`;
+      }).join("")}</div>`;
+    }
+    return `<div class="wrap page"><span class="badge">${c.updated}</span><h1 style="margin-top:16px;font-size:2rem">${c.tariff.title}</h1><p class="lead">${c.tariff.lead}</p><div class="filters no-print" style="margin-top:24px">${filters}</div>${body}
+      <h2 style="margin-top:48px">${c.tariff.notesTitle}</h2>
+      <div style="display:grid;gap:12px;margin-top:16px" class="cat-grid">${c.notes.map((n) => `<div class="card" style="font-size:14px;line-height:1.55;color:var(--muted)">${n}</div>`).join("")}</div>
+    </div>`;
+  }
+  function cmpInput(baseCat) {
+    const c = cat(baseCat);
+    const inp = { categoryId: baseCat, units: S.cmp.units, loadKw: S.cmp.loadKw, prepaid: S.cmp.prepaid, meterRent: false, phase: "single", peak: 0, off: 0, super: 0 };
+    if (c && c.kind === "tou") { const s = splitHours(S.cmp.units, c); inp.peak = s.peak; inp.off = s.off; inp.super = s.super; }
+    return inp;
+  }
+  function pageCompare() {
+    const c = t();
+    const ia = cmpInput(S.cmp.a), ib = cmpInput(S.cmp.b);
+    const ra = bill(ia), rb = bill(ib);
+    const diff = ra && rb ? Math.abs(ra.total - rb.total) : 0;
+    let verdict = "";
+    if (ra && rb) {
+      if (diff < 0.05) verdict = `<p>${c.compare.same}</p>`;
+      else {
+        const cheaper = ra.total < rb.total ? ra : rb;
+        verdict = `<p style="font-family:var(--display);font-size:1.4rem;font-weight:600">${S.lang === "bn" ? cheaper.c.nameBn : cheaper.c.nameEn} ${c.compare.cheaper} ${taka(diff)}</p>`;
+      }
+    }
+    return `<div class="wrap page"><span class="badge">${c.updated}</span><h1 style="margin-top:16px;font-size:2rem">${c.compare.title}</h1><p class="lead">${c.compare.lead}</p>
+      <div class="card" style="margin-top:24px;display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        <div><label class="lbl">${c.compare.a}</label><select onchange="setCmpCat('a', this)">${opts(S.cmp.a)}</select></div>
+        <div><label class="lbl">${c.compare.b}</label><select onchange="setCmpCat('b', this)">${opts(S.cmp.b)}</select></div>
+        <div><label class="lbl">${c.calc.units}</label><input type="number" value="${S.cmp.units}" onchange="setCmpNum('units', this)" /></div>
+        <div><label class="lbl">${c.calc.load}</label><input type="number" step="0.1" value="${S.cmp.loadKw}" onchange="setCmpNum('loadKw', this)" /></div>
+      </div>
+      <div class="choices" style="margin-top:16px">${chip(!S.cmp.prepaid, "setCmpPre(false)", c.calc.postpaid)}${chip(S.cmp.prepaid, "setCmpPre(true)", c.calc.prepaidChoice)}</div>
+      <div class="mint-box" style="margin-top:20px">${verdict}<p class="muted" style="margin:8px 0 0">${c.compare.difference}: ${taka(diff)}</p></div>
+      <div class="grid-2" style="margin-top:24px">${resultCard(ra, ia)}${resultCard(rb, ib)}</div>
+    </div>`;
+  }
+  function pageTools() {
+    const c = t();
+    const tabs = [["appliance", c.tools.appliance], ["converter", c.tools.converter], ["reverse", c.tools.reverse], ["prepaid", c.tools.prepaid]];
+    const leads = { appliance: c.tools.applianceLead, converter: c.tools.converterLead, reverse: c.tools.reverseLead, prepaid: c.tools.prepaidLead };
+    let body = "";
+    if (S.tool === "appliance") {
+      const tot = S.appl.rows.reduce((a, r) => { const k = round2((r.w * r.q / 1000) * r.h * S.appl.days); return { kwh: a.kwh + k, cost: a.cost + k * S.appl.rate }; }, { kwh: 0, cost: 0 });
+      body = `<div class="grid-2"><div class="card" style="padding:0;overflow:hidden">${S.appl.rows.map((r, i) => `<div style="display:grid;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);grid-template-columns:1fr 80px 80px 64px 40px"><input type="text" value="${esc(r.name)}" onchange="updAppl(${i},'name',this)" /><input type="number" value="${r.w}" onchange="updAppl(${i},'w',this)" title="${c.tools.watts}" /><input type="number" step="0.1" value="${r.h}" onchange="updAppl(${i},'h',this)" title="${c.tools.hours}" /><input type="number" value="${r.q}" onchange="updAppl(${i},'q',this)" title="${c.tools.qty}" /><button type="button" class="icon-btn" onclick="delAppl(${i})" aria-label="Remove">×</button></div>`).join("")}
+        <div style="padding:16px;display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn btn-sec" onclick="addAppl()">${c.tools.add}</button><select style="max-width:240px" onchange="addFromList(this)"><option value="">${c.tools.fromList}</option>${APPL.map((a) => `<option value="${a.id}">${S.lang === "bn" ? a.bn : a.en} (${a.w}W)</option>`).join("")}</select></div></div>
+        <div><div class="card"><label class="lbl">${c.tools.rate}</label><input type="number" step="0.01" value="${S.appl.rate}" onchange="setApplMeta('rate', this)" /><label class="lbl" style="margin-top:16px">${c.tools.days}</label><input type="number" value="${S.appl.days}" onchange="setApplMeta('days', this)" /></div>
+        <div class="card" style="margin-top:16px"><p class="muted" style="margin:0;font-size:14px">${c.tools.monthlyKwh}</p><p class="total" style="font-size:2rem;margin:4px 0 0">${fmtN(tot.kwh, 1)}</p><p class="muted" style="margin:16px 0 0;font-size:14px">${c.tools.monthlyCost}</p><p class="total" style="font-size:2rem;margin:4px 0 0;color:var(--primary)">${taka(tot.cost)}</p></div></div></div>`;
+    } else if (S.tool === "converter") {
+      const kwh = round2((S.conv.w * S.conv.q / 1000) * S.conv.h * S.conv.d);
+      body = `<div class="card card-lg" style="max-width:32rem;margin:auto"><div style="display:grid;gap:16px;grid-template-columns:1fr 1fr"><div><label class="lbl">${c.tools.watts}</label><input type="number" value="${S.conv.w}" onchange="setConv('w', this)" /></div><div><label class="lbl">${c.tools.hours}</label><input type="number" step="0.1" value="${S.conv.h}" onchange="setConv('h', this)" /></div><div><label class="lbl">${c.tools.days}</label><input type="number" value="${S.conv.d}" onchange="setConv('d', this)" /></div><div><label class="lbl">${c.tools.qty}</label><input type="number" value="${S.conv.q}" onchange="setConv('q', this)" /></div></div><p class="muted" style="margin:24px 0 0;font-size:14px">${c.tools.monthlyKwh}</p><p class="total" style="color:var(--primary)">${fmtN(kwh, 2)}</p></div>`;
+    } else if (S.tool === "reverse") {
+      const u = unitsForBill(S.rev.amount, S.rev);
+      body = `<div class="card card-lg" style="max-width:32rem;margin:auto"><label class="lbl">${c.tools.billAmount}</label><input type="number" value="${S.rev.amount}" onchange="setRev('amount', this)" />
+        <label class="lbl" style="margin-top:16px">${c.calc.category}</label><select onchange="setRev('categoryId', this)">${opts(S.rev.categoryId)}</select>
+        <label class="lbl" style="margin-top:16px">${c.calc.load}</label><input type="number" step="0.1" value="${S.rev.loadKw}" onchange="setRev('loadKw', this)" />
+        <div class="choices" style="margin-top:16px">${chip(!S.rev.prepaid, "setRevPre(false)", c.calc.postpaid)}${chip(S.rev.prepaid, "setRevPre(true)", c.calc.prepaidChoice)}</div>
+        ${S.rev.prepaid ? `<div class="choices" style="margin-top:8px">${chip(!S.rev.meterRent, "setRevRent(false)", c.calc.no)}${chip(S.rev.meterRent, "setRevRent(true)", c.calc.yes)}</div>` : ""}
+        ${S.rev.prepaid && S.rev.meterRent ? `<div class="choices" style="margin-top:8px">${chip(S.rev.phase === "single", "setRevPhase('single')", c.calc.singlePhase)}${chip(S.rev.phase === "three", "setRevPhase('three')", c.calc.threePhase)}</div>` : ""}
+        <p class="muted" style="margin:24px 0 0;font-size:14px">${c.tools.estimatedUnits}</p><p class="total" style="color:var(--primary)">${u == null ? "—" : fmtN(u, 1)}</p></div>`;
+    } else {
+      const post = bill({ categoryId: S.input.categoryId, units: S.input.units, peak: S.input.peak, off: S.input.off, super: S.input.super, loadKw: S.input.loadKw, prepaid: false, meterRent: false, phase: "single" });
+      const pre = bill({ categoryId: S.input.categoryId, units: S.input.units, peak: S.input.peak, off: S.input.off, super: S.input.super, loadKw: S.input.loadKw, prepaid: true, meterRent: false, phase: "single" });
+      const saveAmt = post && pre ? round2(post.total - pre.total) : 0;
+      body = `<div class="grid-2">${resultCard(post, Object.assign({}, S.input, { prepaid: false, meterRent: false }))}${resultCard(pre, Object.assign({}, S.input, { prepaid: true, meterRent: false }))}</div>
+        <div class="mint-box" style="margin-top:16px"><p style="margin:0;font-weight:600">${c.tools.save}: ${taka(saveAmt)}</p><p class="hint">${c.tools.prepaidLead} · ${c.calc.category}: ${S.input.categoryId}</p></div>`;
+    }
+    return `<div class="wrap page"><span class="badge">${c.updated}</span><h1 style="margin-top:16px;font-size:2rem">${c.tools.title}</h1><p class="lead">${leads[S.tool]}</p>
+      <div class="filters" style="margin-top:24px">${tabs.map(([id, lab]) => `<button type="button" class="pill ${S.tool === id ? "on" : ""}" onclick="setTool('${id}')">${lab}</button>`).join("")}</div>
+      <div style="margin-top:32px">${body}</div></div>`;
+  }
+  function pageGuides() {
+    const c = t();
+    const bn = S.lang === "bn";
+    const sections = bn ? [
+      { h: "বিলঘর দিয়ে হিসাব", html: `<ol><li>গ্রাহক ক্যাটাগরি বাছুন। বাড়ি হলে LT-A, দোকান LT-E, ক্ষুদ্র কারখানা LT-C1।</li><li>মাসিক ইউনিট লিখুন — বর্তমান রিডিং থেকে আগের রিডিং বাদ।</li><li>অনুমোদিত লোড দিন। না জানলে আবাসিকে ১ কিলোওয়াট ধরে শুরু করুন।</li><li>পোস্টপেইড বা প্রিপেইড। প্রিপেইডে মিটার ভাড়া হ্যাঁ হলে এক ফেজ ৳৪০, থ্রি ফেজ ৳২৫০।</li></ol><div class="callout">ক্যালকুলেটর এনার্জি, ডিমান্ড, ৫% ভ্যাট, ছাড় ও প্রিপেইড মিটার ভাড়া ধরে। ফুয়েল সারচার্জ বা বিলম্ব ফি বিলের কাগজে আলাদা থাকতে পারে।</div>` },
+      { h: "সূত্র", html: `<p class="formula">মোট = (এনার্জি + ডিমান্ড − প্রিপেইড ছাড়) + ভ্যাট ৫% + মিটার ভাড়া</p><p>আবাসিকে স্ল্যাব প্রগ্রেসিভ। ২০০ ইউনিট মানে সবকটি উপরের হারে নয়।</p>
+        <table><thead><tr><th>লাইন</th><th>হিসাব</th><th>টাকা</th></tr></thead><tbody>
+        <tr><td>০–৭৫</td><td>৭৫ × ৳৫.২৬</td><td>৩৯৪.৫০</td></tr>
+        <tr><td>৭৬–২০০</td><td>১২৫ × ৳৮.৫০</td><td>১,০৬২.৫০</td></tr>
+        <tr><td>ডিমান্ড</td><td>১ × ৳৪২</td><td>৪২.০০</td></tr>
+        <tr><td>ভ্যাট ৫%</td><td>১,৪৯৯ × ০.০৫</td><td>৭৪.৯৫</td></tr>
+        <tr><td colspan="2"><strong>মোট</strong></td><td><strong>১,৫৭৩.৯৫</strong></td></tr></tbody></table>` },
+      { h: "আবাসিক স্ল্যাব (LT-A)", html: `<table><thead><tr><th>ইউনিট</th><th>হার</th><th>নোট</th></tr></thead><tbody>
+        <tr><td>০–৫০, মোট ≤ ৫০</td><td>৳৪.৬৩</td><td>লাইফলাইন</td></tr>
+        <tr><td>০–৭৫</td><td>৳৫.২৬</td><td>৫১ হলে এখান থেকে</td></tr>
+        <tr><td>৭৬–২০০</td><td>৳৮.৫০</td><td></td></tr>
+        <tr><td>২০১–৩০০</td><td>৳৯.১০</td><td></td></tr>
+        <tr><td>৩০১–৪০০</td><td>৳৯.৬২</td><td></td></tr>
+        <tr><td>৪০১–৬০০</td><td>৳১৫.০১</td><td></td></tr>
+        <tr><td>৬০১+</td><td>৳১৭.৩৫</td><td></td></tr></tbody></table>
+        <div class="callout">৫০ ইউনিট পর্যন্ত ৳৪.৬৩। ৫১ হলে লাইফলাইন উঠে যায় — প্রথম ইউনিট থেকেই ৳৫.২৬।</div>` },
+      { h: "ক্যাটাগরি", html: `<table><thead><tr><th>কোড</th><th>কে</th><th>হার</th><th>ডিমান্ড</th></tr></thead><tbody>
+        <tr><td>LT-A</td><td>বাড়ি, ফ্ল্যাট</td><td>স্ল্যাব</td><td>৳৪২</td></tr>
+        <tr><td>LT-B</td><td>সেচ পাম্প</td><td>ফ্ল্যাট ৳৬.০৪</td><td>৳৪২</td></tr>
+        <tr><td>LT-C1</td><td>ক্ষুদ্র শিল্প</td><td>পিক / অফ-পিক</td><td>৳৪৮</td></tr>
+        <tr><td>LT-D3</td><td>ইভি চার্জিং</td><td>পিক / অফ-পিক / সুপার</td><td>৳৯০</td></tr>
+        <tr><td>LT-E</td><td>দোকান, অফিস</td><td>পিক / অফ-পিক</td><td>৳৯০</td></tr>
+        <tr><td>MT</td><td>১১ কেভি শিল্প</td><td>সাধারণত পিক / অফ-পিক</td><td>৳৯০–১২০</td></tr></tbody></table>` },
+      { h: "পিক সময়", html: `<p>পিক সাধারণত বিকেল ৫টা–রাত ১১টা। আবাসিক LT-A স্ল্যাব — ঘণ্টা বদলালে হার বদলায় না। দোকান ও শিল্পে অফ-পিক সস্তা।</p>` },
+    ] : [
+      { h: "Using Bilghor", html: `<ol><li>Pick a category. Home is LT-A, shop LT-E, small factory LT-C1.</li><li>Enter monthly units — current reading minus previous.</li><li>Enter sanctioned load. Start with 1 kW for a home if unsure.</li><li>Postpaid or prepaid. Prepaid meter rent is ৳40 single phase or ৳250 three phase.</li></ol><div class="callout">Energy, demand, 5% VAT, rebate and optional prepaid meter rent are included. Fuel surcharge is not.</div>` },
+      { h: "Formula", html: `<p class="formula">Total = (energy + demand − prepaid rebate) + 5% VAT + meter rent</p>
+        <table><thead><tr><th>Line</th><th>Math</th><th>Taka</th></tr></thead><tbody>
+        <tr><td>0–75</td><td>75 × ৳5.26</td><td>394.50</td></tr>
+        <tr><td>76–200</td><td>125 × ৳8.50</td><td>1,062.50</td></tr>
+        <tr><td>Demand</td><td>1 × ৳42</td><td>42.00</td></tr>
+        <tr><td>VAT 5%</td><td>1,499 × 0.05</td><td>74.95</td></tr>
+        <tr><td colspan="2"><strong>Total</strong></td><td><strong>1,573.95</strong></td></tr></tbody></table>` },
+      { h: "Residential slabs (LT-A)", html: `<table><thead><tr><th>Units</th><th>Rate</th><th>Note</th></tr></thead><tbody>
+        <tr><td>0–50 if total ≤ 50</td><td>৳4.63</td><td>Lifeline</td></tr>
+        <tr><td>0–75</td><td>৳5.26</td><td>Starts here at 51</td></tr>
+        <tr><td>76–200</td><td>৳8.50</td><td></td></tr>
+        <tr><td>201–300</td><td>৳9.10</td><td></td></tr>
+        <tr><td>301–400</td><td>৳9.62</td><td></td></tr>
+        <tr><td>401–600</td><td>৳15.01</td><td></td></tr>
+        <tr><td>601+</td><td>৳17.35</td><td></td></tr></tbody></table>` },
+      { h: "Categories", html: `<table><thead><tr><th>Code</th><th>Who</th><th>Energy</th><th>Demand</th></tr></thead><tbody>
+        <tr><td>LT-A</td><td>Home, flat</td><td>Slabs</td><td>৳42</td></tr>
+        <tr><td>LT-B</td><td>Irrigation pump</td><td>Flat ৳6.04</td><td>৳42</td></tr>
+        <tr><td>LT-C1</td><td>Small industry</td><td>Peak / off-peak</td><td>৳48</td></tr>
+        <tr><td>LT-D3</td><td>EV charging</td><td>Peak / off-peak / super</td><td>৳90</td></tr>
+        <tr><td>LT-E</td><td>Shop, office</td><td>Peak / off-peak</td><td>৳90</td></tr>
+        <tr><td>MT</td><td>11 kV industry</td><td>Usually TOU</td><td>৳90–120</td></tr></tbody></table>` },
+      { h: "Peak hours", html: `<p>Peak is generally 5:00 PM – 11:00 PM. Residential LT-A is a monthly slab — the clock does not change the rate. Shops and industry pay less off-peak.</p>` },
+    ];
+    return `<div class="wrap page"><span class="badge">${c.updated}</span><h1 style="margin-top:16px;font-size:2rem">${c.guides.title}</h1><p class="lead">${c.guides.lead}</p>
+      <div class="guide">${sections.map((s) => `<section class="card card-lg" style="margin-top:20px"><h2 style="font-size:1.35rem">${s.h}</h2>${s.html}</section>`).join("")}</div></div>`;
+  }
+  function pageFaq() {
+    const c = t();
+    return `<div class="wrap page"><span class="badge">${c.updated}</span><h1 style="margin-top:16px;font-size:2rem">${c.faq.title}</h1><p class="lead">${c.faq.lead}</p>
+      <div style="border-top:1px solid var(--border);margin-top:32px">${c.faq.items.map(([q, a]) => `<details class="faq"><summary>${q}<span class="subtle">+</span></summary><p class="muted" style="margin:12px 0 0;max-width:48rem;font-size:14px;line-height:1.6">${a}</p></details>`).join("")}</div></div>`;
+  }
+
+  function render() {
+    applyTheme();
+    const c = t();
+    document.getElementById("brand").textContent = c.brand;
+    document.getElementById("f-brand").textContent = c.brand;
+    document.getElementById("f-tag").textContent = c.tagline;
+    document.getElementById("f-copy").textContent = c.footer.copyright + "  " + c.footer.developedBy;
+    document.getElementById("lang-bn").className = S.lang === "bn" ? "on" : "";
+    document.getElementById("lang-en").className = S.lang === "en" ? "on" : "";
+    document.getElementById("theme-btn").innerHTML = S.theme === "dark"
+      ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+      : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 14.5A8.4 8.4 0 1 1 9.5 3 7 7 0 0 0 21 14.5z"/></svg>';
+    document.getElementById("nav-desk").innerHTML = navHtml();
+    document.getElementById("nav-mob").innerHTML = navHtml();
+    document.getElementById("nav-mob").classList.toggle("open", S.menu);
+    document.title = c.brand + " — " + c.nav[S.page];
+    const pages = { calc: pageCalc, tariff: pageTariff, compare: pageCompare, tools: pageTools, guides: pageGuides, faq: pageFaq };
+    document.getElementById("main").innerHTML = (pages[S.page] || pageCalc)();
+  }
+
+  window.addEventListener("hashchange", () => {
+    const p = (location.hash || "#calc").slice(1);
+    if (NAV.includes(p)) { S.page = p; S.menu = false; render(); }
+  });
+  const start = (location.hash || "#calc").slice(1);
+  if (NAV.includes(start)) S.page = start;
+  applyTheme();
+  render();
+})();
+  </script>
+</body>
+</html>
