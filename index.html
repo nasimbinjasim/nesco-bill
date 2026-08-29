@@ -261,10 +261,6 @@
     { id: "heater", en: "Geyser / water heater", bn: "গিজার / ওয়াটার হিটার", w: 2000, h: 1 },
     { id: "microwave", en: "Microwave", bn: "মাইক্রোওয়েভ", w: 1200, h: 0.3 },
   ];
-  const JUMPS = ["LT-A", "LT-E", "LT-C1", "LT-D3", "LT-B"];
-  const ICONS = {
-    "LT-A": "⌂", "LT-E": "▤", "LT-C1": "⚙", "LT-D3": "⚡", "LT-B": "☘",
-  };
   const COPY = {
     en: {
       brand: "Bilghor", tagline: "NESCO electricity tariff & bill calculator",
@@ -272,7 +268,6 @@
       nav: { calc: "Calculator", tariff: "Tariff", compare: "Compare", tools: "Tools", guides: "Guides", faq: "Questions" },
       heroTitle: "What will this month cost?",
       heroLead: "Enter your NESCO meter category and units. Bilghor applies BERC slabs, demand charge, 5% VAT, prepaid rebate, and optional meter rent.",
-      which: "Which rate applies to you?",
       calc: { category: "Consumer category", units: "Monthly units (kWh)", unitsHint: "Current reading minus previous reading.", peak: "Peak units", offPeak: "Off-peak units", superOffPeak: "Super off-peak units", load: "Sanctioned load (kW)", loadHint: "Printed on your bill as connected / sanctioned load.", prepaidChoice: "Prepaid", postpaid: "Postpaid", meterType: "Meter type", meterRent: "Include meter rent?", meterRentHint: "Added after VAT — not taxed.", meterRentLine: "Meter rent", yes: "Yes", no: "No", phase: "Connection", singlePhase: "Single phase", threePhase: "Three phase", calculate: "Calculate bill", reset: "Reset", split: "Split total by peak hours", splitHint: "Have a single unit total? We’ll split it by the official peak window.", totalUnits: "Total units to split", result: "Estimated bill", energy: "Energy charge", demand: "Demand charge", subtotal: "Subtotal", vat: "VAT 5%", prepaidRebate: "Prepaid rebate 0.5%", total: "Total payable", effective: "Effective energy rate", perUnit: "per unit", breakdown: "Slab analysis", shareOfTotal: "Share of the total bill", otherCharges: "Other charges", empty: "Enter units to see a bill.", vsFeb2024: "Versus February 2024 tariff", feb2024Bill: "February 2024 bill", higherBy: "Higher by", lowerBy: "Lower by", sameAsFeb2024: "Same total as the February 2024 tariff.", feb2024Note: "Same units and load. Energy rates from BERC SRO 43 of 29 February 2024." },
       tariff: { title: "Electricity tariff rates", lead: "All LT and MT categories from the BERC order used for the June 2026 billing cycle — the rates NESCO bills.", demand: "Demand", perKva: "/kVA", perKwh: "/kWh", lifeline: "Lifeline", peak: "Peak", offPeak: "Off-peak", super: "Super off-peak", misc: "Misc. fees", miscLead: "Application, disconnection, meter, and transformer charges published with the tariff.", notesTitle: "How the rates work" },
       notes: ["The ৳4.63 lifeline rate applies only if total monthly use is 50 units or less. Use more than 50 and the regular slabs start at the 0–75 step.", "Peak hours are generally 5:00 PM to 11:00 PM.", "Off-peak is generally 11:00 PM to 5:00 PM the next day. For LT-D3 and MT-7: 11:00 PM–5:00 AM and 9:00 AM–5:00 PM.", "Super off-peak (5:00 AM–9:00 AM) applies only to LT-D3 and MT-7.", "VAT is 5% on energy plus demand, after the prepaid rebate if any.", "Prepaid meter rebate: 0.5% on net bill excluding VAT."],
@@ -295,8 +290,7 @@
       nav: { calc: "ক্যালকুলেটর", tariff: "ট্যারিফ", compare: "তুলনা", tools: "টুলস", guides: "গাইড", faq: "প্রশ্ন" },
       heroTitle: "এই মাসের বিল কত?",
       heroLead: "নেসকো মিটার ক্যাটাগরি ও ইউনিট দিন। বিলঘর বিইআরসির স্ল্যাব, ডিমান্ড চার্জ, ৫% ভ্যাট, প্রিপেইড ছাড় ও মিটার ভাড়া প্রয়োগ করে।",
-      which: "আপনার হার কোনটি?",
-      calc: { category: "গ্রাহক ক্যাটাগরি", units: "মাসিক ইউনিট (কিলোওয়াট-ঘণ্টা)", unitsHint: "বর্তমান রিডিং থেকে আগের রিডিং বাদ দিন।", peak: "পিক ইউনিট", offPeak: "অফ-পিক ইউনিট", superOffPeak: "সুপার অফ-পিক ইউনিট", load: "অনুমোদিত লোড (কিলোওয়াট)", loadHint: "বিলের কাগজে লেখা সংযুক্ত / অনুমোদিত লোড।", prepaidChoice: "প্রিপেইড", postpaid: "পোস্টপেইড", meterType: "মিটারের ধরন", meterRent: "মিটার ভাড়া যোগ করবেন?", meterRentHint: "ভ্যাটের পর যোগ হয় — ভ্যাট হয় না।", meterRentLine: "মিটার ভাড়া", yes: "হ্যাঁ", no: "না", phase: "সংযোগ", singlePhase: "এক ফেজ", threePhase: "থ্রি ফেজ", calculate: "বিল হিসাব করুন", reset: "রিসেট", split: "পিক ঘণ্টা অনুযায়ী ভাগ করুন", splitHint: "শুধু মোট ইউনিট জানেন? অফিসিয়াল পিক সময় অনুযায়ী ভাগ করে দেব।", totalUnits: "ভাগ করার মোট ইউনিট", result: "আনুমানিক বিল", energy: "এনার্জি চার্জ", demand: "ডিমান্ড চার্জ", subtotal: "উপমোট", vat: "ভ্যাট ৫%", prepaidRebate: "প্রিপেইড ছাড় ০.৫%", total: "মোট পরিশোধ্য", effective: "কার্যকর এনার্জি হার", perUnit: "প্রতি ইউনিট", breakdown: "স্লাব বিশ্লেষণ", shareOfTotal: "মোট বিলের অংশ", otherCharges: "অন্যান্য চার্জ", empty: "বিল দেখতে ইউনিট লিখুন।", vsFeb2024: "ফেব্রুয়ারি ২০২৪ ট্যারিফের তুলনায়", feb2024Bill: "ফেব্রুয়ারি ২০২৪-এর বিল", higherBy: "বেশি", lowerBy: "কম", sameAsFeb2024: "ফেব্রুয়ারি ২০২৪ ট্যারিফের সাথে মোট একই।", feb2024Note: "একই ইউনিট ও লোড। এনার্জি হার বিইআরসি এস.আর.ও. ৪৩ আইন/২০২৪ (২৯ ফেব্রুয়ারি ২০২৪)।" },
+      calc: { category: "গ্রাহক ক্যাটাগরি", units: "মাসিক ইউনিট (কিলোওয়াট-ঘণ্টা)", unitsHint: "বর্তমান রিডিং থেকে আগের রিডিং বাদ দিন।", peak: "পিক ইউনিট", offPeak: "অফ-পিক ইউনিট", superOffPeak: "সুপার অফ-পিক ইউনিট", load: "অনুমোদিত লোড (কিলোওয়াট)", loadHint: "বিলের কাগজে লেখা সংযুক্ত / অনুমোদিত লোড।", prepaidChoice: "প্রিপেইড", postpaid: "পোস্টপেইড", meterType: "মিটারের ধরন", meterRent: "মিটার ভাড়া যোগ করবেন?", meterRentHint: "ভ্যাটের পর যোগ হয় — ভ্যাট হয় না।", meterRentLine: "মিটার ভাড়া", yes: "হ্যাঁ", no: "না", phase: "সংযোগ", singlePhase: "এক ফেজ", threePhase: "থ্রি ফেজ", calculate: "বিল হিসাব করুন", reset: "রিসেট", split: "পিক ঘণ্টা অনুযায়ী ভাগ করুন", splitHint: "শুধু মোট ইউনিট জানেন? অফিসিয়াল পিক সময় অনুযায়ী ভাগ করে দেব।", totalUnits: "ভাগ করার মোট ইউনিট", result: "আপনার বিল", energy: "এনার্জি চার্জ", demand: "ডিমান্ড চার্জ", subtotal: "উপমোট", vat: "ভ্যাট ৫%", prepaidRebate: "প্রিপেইড ছাড় ০.৫%", total: "মোট পরিশোধ্য", effective: "কার্যকর এনার্জি হার", perUnit: "প্রতি ইউনিট", breakdown: "স্লাব বিশ্লেষণ", shareOfTotal: "মোট বিলের অংশ", otherCharges: "অন্যান্য চার্জ", empty: "বিল দেখতে ইউনিট লিখুন।", vsFeb2024: "ফেব্রুয়ারি ২০২৪ ট্যারিফের তুলনায়", feb2024Bill: "ফেব্রুয়ারি ২০২৪-এর বিল", higherBy: "বেশি", lowerBy: "কম", sameAsFeb2024: "ফেব্রুয়ারি ২০২৪ ট্যারিফের সাথে মোট একই।", feb2024Note: "একই ইউনিট ও লোড। এনার্জি হার বিইআরসি এস.আর.ও. ৪৩ আইন/২০২৪ (২৯ ফেব্রুয়ারি ২০২৪)।" },
       tariff: { title: "বিদ্যুৎ ট্যারিফ হার", lead: "জুন ২০২৬ বিলিং চক্রের বিইআরসি আদেশ অনুযায়ী সব এলটি ও এমটি ক্যাটাগরি — নেসকো এই হারে বিল করে।", demand: "ডিমান্ড", perKva: "/কেভিএ", perKwh: "/কিলোওয়াট-ঘণ্টা", lifeline: "লাইফলাইন", peak: "পিক", offPeak: "অফ-পিক", super: "সুপার অফ-পিক", misc: "বিবিধ ফি", miscLead: "ট্যারিফের সাথে প্রকাশিত আবেদন, বিচ্ছিন্নকরণ, মিটার ও ট্রান্সফরমার চার্জ।", notesTitle: "হার কীভাবে কাজ করে" },
       notes: ["৳৪.৬৩ লাইফলাইন হার কেবল তখনই প্রযোজ্য যখন মাসিক ব্যবহার ৫০ ইউনিট বা তার কম। ৫০-এর বেশি হলে সাধারণ ০–৭৫ স্ল্যাব থেকে হিসাব হয়।", "পিক সময় সাধারণত বিকেল ৫টা থেকে রাত ১১টা।", "অফ-পিক সাধারণত রাত ১১টা থেকে পরদিন বিকেল ৫টা। এলটি-ডি৩ ও এমটি-৭-এর জন্য: রাত ১১টা–ভোর ৫টা এবং সকাল ৯টা–বিকেল ৫টা।", "সুপার অফ-পিক (ভোর ৫টা–সকাল ৯টা) শুধু এলটি-ডি৩ ও এমটি-৭-এ প্রযোজ্য।", "ভ্যাট ৫% — প্রিপেইড ছাড় থাকলে তার পর এনার্জি ও ডিমান্ডের উপর।", "প্রিপেইড মিটার ছাড়: ভ্যাট বাদে নেট বিলের ০.৫%।"],
       compare: { title: "দুই ক্যাটাগরি তুলনা করুন", lead: "একই ইউনিট, দুই ট্যারিফ — দোকান এলটি-ই না ক্ষুদ্র কারখানা এলটি-সি১, তা যাচাই করতে।", a: "ক্যাটাগরি ক", b: "ক্যাটাগরি খ", difference: "পার্থক্য", cheaper: "সস্তা", same: "দুই বিল একই।" },
@@ -478,7 +472,6 @@
     S.input = { categoryId: "LT-A", units: 200, peak: 0, off: 0, super: 0, loadKw: 1, prepaid: false, meterRent: false, phase: "single" };
     render();
   };
-  window.jump = function (id) { S.input.categoryId = id; S.page = "calc"; render(); document.getElementById("bill-form")?.scrollIntoView({ behavior: "smooth" }); };
   window.setTariff = function (lv) { S.tariffLevel = lv; render(); };
   window.setTool = function (id) { S.tool = id; render(); };
   window.setCmp = function (side, el) { S.cmp[side] = el.type === "checkbox" || el.type === "number" ? (el.type === "checkbox" ? el.checked : Number(el.value)) : el.value; if (side === "a" || side === "b") S.cmp[side] = el.value; render(); };
@@ -585,12 +578,7 @@
       <h1 class="title" style="margin-top:16px">${c.heroTitle}</h1>
       <p class="lead">${c.heroLead}</p>
       <div class="grid-2" style="margin-top:32px">${formCard()}${resultCard(res, S.input)}</div>
-    </div></section>
-    <div class="wrap" style="padding:48px 0 64px">
-      <h2>${c.which}</h2>
-      <div class="jumps">${JUMPS.map((id) => { const x = cat(id); return `<button type="button" class="jump" onclick="jump('${id}')"><i>${ICONS[id] || "•"}</i><span><span class="subtle" style="font-size:12px">${id}</span><span style="display:block;font-size:14px;font-weight:500">${S.lang === "bn" ? x.shortBn : x.shortEn}</span></span></button>`; }).join("")}</div>
-      <p style="margin-top:16px"><a href="#tariff" onclick="event.preventDefault();go('tariff')">${c.nav.tariff} →</a></p>
-    </div>`;
+    </div></section>`;
   }
   function pageTariff() {
     const c = t();
